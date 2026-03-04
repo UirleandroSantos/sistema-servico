@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [manterConectado, setManterConectado] = useState(false);
   const navigate = useNavigate();
 
   async function handleLogin(e) {
@@ -20,14 +21,20 @@ export default function Login() {
       return;
     }
 
-    const { data: profile, error: profileError } = await supabase
+    if (manterConectado) {
+      localStorage.setItem("manterLogado", "true");
+    } else {
+      localStorage.removeItem("manterLogado");
+    }
+
+    const { data: profile } = await supabase
       .from("profiles")
       .select("role, primeiro_login")
       .eq("id", data.user.id)
-      .maybeSingle(); // 🔥 trocado para maybeSingle
+      .maybeSingle();
 
-    if (profileError || !profile) {
-      alert("Perfil não encontrado. Fale com o administrador.");
+    if (!profile) {
+      alert("Perfil não encontrado.");
       return;
     }
 
@@ -54,6 +61,7 @@ export default function Login() {
         </h2>
 
         <div className="flex flex-col gap-4">
+
           <input
             type="email"
             placeholder="Email"
@@ -72,12 +80,22 @@ export default function Login() {
             required
           />
 
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={manterConectado}
+              onChange={() => setManterConectado(!manterConectado)}
+            />
+            Manter-me conectado
+          </label>
+
           <button
             type="submit"
             className="bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-md"
           >
             Entrar
           </button>
+
         </div>
       </form>
     </div>
