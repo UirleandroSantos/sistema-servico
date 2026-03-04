@@ -11,6 +11,8 @@ export default function AdminFinalizadas() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [expandido, setExpandido] = useState(null);
+  const [erroFiltro, setErroFiltro] = useState("");
+
   const [resumoFinanceiro, setResumoFinanceiro] = useState({
     brutoTotal: 0,
     comissoes: {}
@@ -30,6 +32,23 @@ export default function AdminFinalizadas() {
   }
 
   async function buscarDados() {
+    setErroFiltro("");
+    setDados({});
+    setResumoFinanceiro({
+      brutoTotal: 0,
+      comissoes: {}
+    });
+
+    // 🔴 VALIDAÇÃO OBRIGATÓRIA
+    if (!dataInicio || !dataFim) {
+      setErroFiltro("Selecione a data inicial e a data final para consultar.");
+      return;
+    }
+
+    if (dataInicio > dataFim) {
+      setErroFiltro("A data inicial não pode ser maior que a data final.");
+      return;
+    }
 
     let query = supabase
       .from("ordens_servico")
@@ -38,18 +57,9 @@ export default function AdminFinalizadas() {
         clientes (nome_cliente, nome_pet),
         profiles (id, nome, comissao)
       `)
-      .eq("status", "finalizado");
-
-    // ✅ CORREÇÃO DEFINITIVA DO FILTRO DE DATA
-    if (dataInicio) {
-      const inicio = `${dataInicio}T00:00:00`;
-      query = query.gte("data_finalizacao", inicio);
-    }
-
-    if (dataFim) {
-      const fim = `${dataFim}T23:59:59`;
-      query = query.lte("data_finalizacao", fim);
-    }
+      .eq("status", "finalizado")
+      .gte("data_finalizacao", `${dataInicio}T00:00:00`)
+      .lte("data_finalizacao", `${dataFim}T23:59:59`);
 
     if (funcionarioSelecionado) {
       query = query.eq("funcionario_id", funcionarioSelecionado);
@@ -59,7 +69,7 @@ export default function AdminFinalizadas() {
 
     if (error) {
       console.log(error);
-      alert("Erro ao buscar dados");
+      setErroFiltro("Erro ao buscar dados.");
       return;
     }
 
@@ -96,7 +106,7 @@ export default function AdminFinalizadas() {
   }
 
   function formatar(valor) {
-    return valor.toLocaleString("pt-BR", {
+    return Number(valor).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
@@ -167,6 +177,13 @@ export default function AdminFinalizadas() {
           Consultar
         </button>
       </div>
+
+      {/* 🔴 ERRO */}
+      {erroFiltro && (
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+          {erroFiltro}
+        </div>
+      )}
 
       {/* RESUMO FINANCEIRO */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8">
