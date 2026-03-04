@@ -35,6 +35,7 @@ export default function CadastrarFuncionario() {
         id: data.user.id,
         nome: nome,
         role: "membro",
+        primeiro_login: true,
       },
     ]);
 
@@ -52,9 +53,7 @@ export default function CadastrarFuncionario() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
-
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-
         <button
           onClick={() => navigate(-1)}
           className="mb-6 text-sm text-blue-600 hover:underline"
@@ -67,7 +66,6 @@ export default function CadastrarFuncionario() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           <input
             placeholder="Nome do Funcionário"
             value={nome}
@@ -83,9 +81,7 @@ export default function CadastrarFuncionario() {
           >
             {loading ? "Criando..." : "Criar Funcionário"}
           </button>
-
         </form>
-
       </div>
     </div>
   );

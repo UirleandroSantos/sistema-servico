@@ -20,11 +20,21 @@ export default function Login() {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, primeiro_login")
       .eq("id", data.user.id)
-      .single();
+      .maybeSingle(); // 🔥 trocado para maybeSingle
+
+    if (profileError || !profile) {
+      alert("Perfil não encontrado. Fale com o administrador.");
+      return;
+    }
+
+    if (profile.primeiro_login) {
+      navigate("/trocar-senha");
+      return;
+    }
 
     if (profile.role === "admin") {
       navigate("/admin");
@@ -35,7 +45,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700">
-      
       <form
         onSubmit={handleLogin}
         className="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md"
@@ -45,7 +54,6 @@ export default function Login() {
         </h2>
 
         <div className="flex flex-col gap-4">
-
           <input
             type="email"
             placeholder="Email"
@@ -70,7 +78,6 @@ export default function Login() {
           >
             Entrar
           </button>
-
         </div>
       </form>
     </div>
