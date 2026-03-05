@@ -40,8 +40,24 @@ export default function DashboardAdmin() {
           onClick={() => navigate("/admin/finalizadas")}
           className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition cursor-pointer"
         >
-          <h3 className="text-xl font-semibold mb-2">Serviços Finalizados</h3>
-          <p className="text-gray-500">Consultar serviços concluídos</p>
+          <h3 className="text-xl font-semibold mb-2">Gerenciar Serviços</h3>
+          <p className="text-gray-500">Consultar serviços pendentes e finalizados</p>
+        </div>
+
+        <div
+          onClick={() => navigate("/admin/clientes/buscar")}
+          className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition cursor-pointer"
+        >
+          <h3 className="text-xl font-semibold">Gerenciar clientes</h3>
+          <p className="text-gray-500">Consultar, Editar, Excluir e ver Histórico</p>
+        </div>
+
+        <div
+          onClick={() => navigate("/admin/grafico")}
+          className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition cursor-pointer"
+        >
+          <h3 className="text-xl font-semibold">Gráfico Financeiro</h3>
+          <p className="text-gray-500">Veja o Gráfico da sua empresa</p>
         </div>
 
       </div>
