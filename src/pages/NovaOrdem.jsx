@@ -5,13 +5,22 @@ import { useNavigate } from "react-router-dom";
 export default function NovaOrdem() {
   const navigate = useNavigate();
 
+  function getHoje() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+
+  return `${ano}-${mes}-${dia}`;
+}
+
   const [clientes, setClientes] = useState([]);
   const [funcionarios, setFuncionarios] = useState([]);
   const [buscaCliente, setBuscaCliente] = useState("");
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
 
   const [form, setForm] = useState({
-    data_servico: new Date().toISOString().split("T")[0],
+    data_servico: getHoje(),
     funcionario_id: "",
     tipo_servico: "",
     valor: "",
@@ -50,6 +59,26 @@ export default function NovaOrdem() {
       return;
     }
 
+    if (!form.funcionario_id) {
+      alert("Selecione um funcionário");
+      return;
+    }
+
+    if (!form.tipo_servico) {
+      alert("Selecione o tipo de serviço");
+      return;
+    }
+
+    if (!form.valor) {
+      alert("Informe o valor");
+      return;
+    }
+
+    // 🔥 Garante data atual no momento do clique
+    const dataFinal = form.data_servico
+      ? form.data_servico
+      : getHoje();
+
     const { error } = await supabase
       .from("ordens_servico")
       .insert([
@@ -57,7 +86,7 @@ export default function NovaOrdem() {
           cliente_id: clienteSelecionado.id,
           funcionario_id: form.funcionario_id,
           tipo_servico: form.tipo_servico,
-          data_servico: form.data_servico,
+          data_servico: dataFinal,
           valor: Number(form.valor),
           observacoes: form.observacoes,
           status: "pendente",
@@ -65,6 +94,7 @@ export default function NovaOrdem() {
       ]);
 
     if (error) {
+      console.log(error);
       alert("Erro ao criar ordem");
     } else {
       alert("Ordem criada com sucesso!");
@@ -127,7 +157,6 @@ export default function NovaOrdem() {
             )}
           </div>
 
-          {/* GRID */}
           <div className="grid md:grid-cols-2 gap-4">
 
             <select

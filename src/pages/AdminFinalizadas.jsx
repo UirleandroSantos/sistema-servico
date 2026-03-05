@@ -12,6 +12,7 @@ export default function AdminFinalizadas() {
   const [dataFim, setDataFim] = useState("");
   const [expandido, setExpandido] = useState(null);
   const [erroFiltro, setErroFiltro] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [resumoFinanceiro, setResumoFinanceiro] = useState({
     brutoTotal: 0,
@@ -34,19 +35,17 @@ export default function AdminFinalizadas() {
   async function buscarDados() {
     setErroFiltro("");
     setDados({});
-    setResumoFinanceiro({
-      brutoTotal: 0,
-      comissoes: {}
-    });
+    setLoading(true);
 
-    // 🔴 VALIDAÇÃO OBRIGATÓRIA
     if (!dataInicio || !dataFim) {
-      setErroFiltro("Selecione a data inicial e a data final para consultar.");
+      setErroFiltro("Selecione a data inicial e a data final.");
+      setLoading(false);
       return;
     }
 
     if (dataInicio > dataFim) {
-      setErroFiltro("A data inicial não pode ser maior que a data final.");
+      setErroFiltro("Data inicial maior que data final.");
+      setLoading(false);
       return;
     }
 
@@ -58,8 +57,8 @@ export default function AdminFinalizadas() {
         profiles (id, nome, comissao)
       `)
       .eq("status", "finalizado")
-      .gte("data_finalizacao", `${dataInicio}T00:00:00`)
-      .lte("data_finalizacao", `${dataFim}T23:59:59`);
+      .gte("data_finalizacao", dataInicio)
+      .lte("data_finalizacao", dataFim);
 
     if (funcionarioSelecionado) {
       query = query.eq("funcionario_id", funcionarioSelecionado);
@@ -70,6 +69,7 @@ export default function AdminFinalizadas() {
     if (error) {
       console.log(error);
       setErroFiltro("Erro ao buscar dados.");
+      setLoading(false);
       return;
     }
 
@@ -103,6 +103,8 @@ export default function AdminFinalizadas() {
       brutoTotal,
       comissoes
     });
+
+    setLoading(false);
   }
 
   function formatar(valor) {
@@ -114,7 +116,7 @@ export default function AdminFinalizadas() {
 
   function formatarData(data) {
     if (!data) return "-";
-    return new Date(data).toLocaleString("pt-BR");
+    return new Date(data + "T00:00:00").toLocaleDateString("pt-BR");
   }
 
   return (
@@ -178,59 +180,49 @@ export default function AdminFinalizadas() {
         </button>
       </div>
 
-      {/* 🔴 ERRO */}
       {erroFiltro && (
         <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
           {erroFiltro}
         </div>
       )}
 
-      {/* RESUMO FINANCEIRO */}
-      <div className="bg-white p-6 rounded-xl shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4">Resumo Financeiro</h3>
+      {loading && <p>Carregando...</p>}
 
-        <p>
-          <strong>Valor Bruto Total (Admin): </strong>
-          {formatar(resumoFinanceiro.brutoTotal)}
-        </p>
+      {/* RESUMO */}
+      {!loading && Object.keys(dados).length > 0 && (
+        <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+          <h3 className="text-xl font-semibold mb-4">Resumo</h3>
+          <p><strong>Total Bruto:</strong> {formatar(resumoFinanceiro.brutoTotal)}</p>
 
-        {Object.keys(resumoFinanceiro.comissoes).map((nome) => (
-          <p key={nome}>
-            <strong>Comissão {nome}: </strong>
-            {formatar(resumoFinanceiro.comissoes[nome])}
-          </p>
-        ))}
-      </div>
+          {Object.entries(resumoFinanceiro.comissoes).map(([nome, valor]) => (
+            <p key={nome}>
+              <strong>{nome}:</strong> {formatar(valor)}
+            </p>
+          ))}
+        </div>
+      )}
 
-      {/* LISTAGEM POR FUNCIONÁRIO */}
-      {Object.keys(dados).map((nome) => (
-        <div key={nome} className="mb-8">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold">{nome}</h3>
-
-            <button
-              onClick={() =>
-                setExpandido(expandido === nome ? null : nome)
-              }
-              className="text-blue-600 hover:underline text-sm"
-            >
-              {expandido === nome ? "Ocultar Serviços" : "Ver Serviços"}
-            </button>
-          </div>
+      {/* LISTAGEM */}
+      {!loading && Object.entries(dados).map(([nome, ordens]) => (
+        <div key={nome} className="bg-white p-6 rounded-xl shadow-md mb-4">
+          <h4
+            className="font-bold cursor-pointer"
+            onClick={() => setExpandido(expandido === nome ? null : nome)}
+          >
+            {nome} ({ordens.length} serviços)
+          </h4>
 
           {expandido === nome && (
-            <div className="mt-4 space-y-4">
-              {dados[nome].map((o) => (
-                <div
-                  key={o.id}
-                  className="bg-white p-4 rounded-xl shadow"
-                >
-                  <p><strong>Cliente:</strong> {o.clientes?.nome_cliente}</p>
-                  <p><strong>Pet:</strong> {o.clientes?.nome_pet}</p>
-                  <p><strong>Serviço:</strong> {o.tipo_servico}</p>
-                  <p><strong>Status:</strong> {o.status}</p>
-                  <p><strong>Finalizado em:</strong> {formatarData(o.data_finalizacao)}</p>
-                  <p><strong>Comissão:</strong> {formatar(o.comissaoCalculada)}</p>
+            <div className="mt-4 space-y-2">
+              {ordens.map((o) => (
+                <div key={o.id} className="border p-3 rounded-lg">
+                  <p><strong>Cliente</strong>: {o.clientes?.nome_cliente}</p>
+                  <p><strong>Pet</strong>: {o.clientes?.nome_pet}</p>
+                  <p><strong>Serviço</strong>: {o.tipo_servico}</p>
+                  <p><strong>Data de Finalização:</strong> {formatarData(o.data_finalizacao)}</p>
+                  <p><strong>Valor</strong>: {formatar(o.valor)}</p>
+                  <p><strong>Comissão</strong>: {formatar(o.comissaoCalculada)}</p>
+                  <p><strong>Status: <span className="text-green-500 text-xl font-semibold mb-4">{o.status}</span></strong></p>
                 </div>
               ))}
             </div>

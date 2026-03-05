@@ -58,12 +58,28 @@ export default function DashboardEquipe() {
   }
 
   async function finalizarOrdem(id) {
-  const { error } = await supabase
+  function getHojeLocal() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  const hojeLocal = getHojeLocal();
+
+  console.log("Data que está sendo enviada:", hojeLocal);
+
+  const { data, error } = await supabase
     .from("ordens_servico")
     .update({
-      status: "finalizado"
+      status: "finalizado",
+      
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select(); // 👈 adiciona isso
+
+  console.log("Resposta do Supabase:", data, error);
 
   if (!error) {
     fetchUsuario();

@@ -13,6 +13,14 @@ export default function DashboardAdmin() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <div
+          onClick={() => navigate("/admin/ordem")}
+          className="bg-green-500 p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition cursor-pointer"
+        >
+          <h3 className="text-xl text-white font-semibold mb-2">Nova Ordem de Serviço</h3>
+          <p className="text-white">Registrar novo serviço</p>
+        </div>
+
+        <div
           onClick={() => navigate("/admin/clientes")}
           className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition cursor-pointer"
         >
@@ -26,14 +34,6 @@ export default function DashboardAdmin() {
         >
           <h3 className="text-xl font-semibold mb-2">Cadastrar Funcionário</h3>
           <p className="text-gray-500">Gerenciar membros da equipe</p>
-        </div>
-
-        <div
-          onClick={() => navigate("/admin/ordem")}
-          className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition cursor-pointer"
-        >
-          <h3 className="text-xl font-semibold mb-2">Criar Ordem de Serviço</h3>
-          <p className="text-gray-500">Registrar novo serviço</p>
         </div>
 
         <div
