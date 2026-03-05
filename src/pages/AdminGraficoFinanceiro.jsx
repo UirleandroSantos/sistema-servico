@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabase";
 import {
   BarChart,
@@ -6,10 +7,13 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
+  ResponsiveContainer
 } from "recharts";
 
 export default function AdminGraficoFinanceiro() {
+
+  const navigate = useNavigate();
 
   const [dados, setDados] = useState([]);
 
@@ -36,12 +40,14 @@ export default function AdminGraficoFinanceiro() {
 
     });
 
-    const resultado = Object.keys(meses).map((m)=>({
+    const resultado = Object.keys(meses)
+      .sort()
+      .map((m)=>({
 
-      mes:m,
-      total:meses[m]
+        mes:m,
+        total:meses[m]
 
-    }));
+      }));
 
     setDados(resultado);
 
@@ -49,25 +55,65 @@ export default function AdminGraficoFinanceiro() {
 
   return(
 
-    <div className="p-6 bg-white rounded shadow">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-lg">
 
-      <h2 className="text-2xl font-bold mb-6">
-        Faturamento Mensal
+      <button
+          onClick={() => navigate("/admin")}
+          className="mb-6 text-blue-600 hover:underline"
+        >
+          ← Voltar
+        </button>
+
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+        📊 Faturamento Mensal
       </h2>
 
-      <BarChart width={600} height={300} data={dados}>
+      <ResponsiveContainer width="100%" height={350}>
 
-        <CartesianGrid strokeDasharray="3 3" />
+        <BarChart data={dados}>
 
-        <XAxis dataKey="mes" />
+          <CartesianGrid
+            strokeDasharray="4 4"
+            stroke="#e5e7eb"
+          />
 
-        <YAxis />
+          <XAxis
+            dataKey="mes"
+            tick={{ fill:"#374151" }}
+          />
 
-        <Tooltip />
+          <YAxis
+            tick={{ fill:"#374151" }}
+          />
 
-        <Bar dataKey="total" />
+          <Tooltip
+            contentStyle={{
+              background:"#111827",
+              border:"none",
+              borderRadius:"10px",
+              color:"#fff"
+            }}
+            formatter={(value)=>
+              [`R$ ${value}`, "Faturamento"]
+            }
+          />
 
-      </BarChart>
+          <defs>
+            <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9}/>
+              <stop offset="95%" stopColor="#60a5fa" stopOpacity={0.6}/>
+            </linearGradient>
+          </defs>
+
+          <Bar
+            dataKey="total"
+            fill="url(#colorBar)"
+            radius={[8,8,0,0]}
+          />
+
+        </BarChart>
+
+      </ResponsiveContainer>
 
     </div>
 
