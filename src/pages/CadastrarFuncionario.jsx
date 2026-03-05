@@ -29,19 +29,18 @@ export default function CadastrarFuncionario() {
 
     setLoading(true);
 
-    // cria usuário no AUTH
     const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: "123456"
-    });
+        email: email,
+        password: "123456"
+        });
 
-    if (error) {
-      alert("Erro ao criar usuário");
-      setLoading(false);
-      return;
-    }
+        if (error) {
+        alert(error.message);
+        setLoading(false);
+        return;
+        }
 
-    const user = data.user;
+        const user = data.user || data.session?.user;
 
     if (!user) {
       alert("Erro ao criar usuário");
