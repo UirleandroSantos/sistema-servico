@@ -3,206 +3,261 @@ import { supabase } from "../services/supabase";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminFinanceiro() {
-    const navigate = useNavigate();
 
-  const [funcionarios,setFuncionarios] = useState([]);
+const navigate = useNavigate();
 
-  const [funcionario,setFuncionario] = useState("");
+const [funcionarios,setFuncionarios] = useState([]);
+const [funcionario,setFuncionario] = useState("");
 
-  const [mes,setMes] = useState("");
+const [mes,setMes] = useState("");
+const [dataInicio,setDataInicio] = useState("");
+const [dataFim,setDataFim] = useState("");
 
-  const [dataInicio,setDataInicio] = useState("");
+const [resultado,setResultado] = useState(null);
 
-  const [dataFim,setDataFim] = useState("");
+useEffect(()=>{
+buscarFuncionarios();
+},[]);
 
-  const [adiantamento,setAdiantamento] = useState("");
+async function buscarFuncionarios(){
 
-  const [descricao,setDescricao] = useState("");
+const {data} = await supabase
+.from("profiles")
+.select("id,nome");
 
-  const [resultado,setResultado] = useState(null);
+setFuncionarios(data || []);
 
-  useEffect(()=>{
-    buscarFuncionarios();
-  },[])
+}
 
-  async function buscarFuncionarios(){
+function aplicarMes(valor){
 
-    const {data} = await supabase
-    .from("profiles")
-    .select("id,nome");
+setMes(valor);
 
-    setFuncionarios(data || []);
+if(!valor) return;
 
-  }
+const [ano,mesNumero] = valor.split("-");
 
-  function aplicarMes(valor){
+const inicio = `${ano}-${mesNumero}-01`;
 
-    setMes(valor);
+const fim = new Date(ano,mesNumero,0)
+.toISOString()
+.split("T")[0];
 
-    if(!valor) return;
+setDataInicio(inicio);
+setDataFim(fim);
 
-    const [ano,mesNumero] = valor.split("-");
+}
 
-    const inicio = `${ano}-${mesNumero}-01`;
+async function calcular(){
 
-    const fim = new Date(ano,mesNumero,0)
-    .toISOString()
-    .split("T")[0];
+if(!funcionario) return;
 
-    setDataInicio(inicio);
-    setDataFim(fim);
+const {data:ordens} = await supabase
+.from("ordens_servico")
+.select(`
+valor,
+profiles(comissao)
+`)
+.eq("funcionario_id",funcionario)
+.eq("status","finalizado")
+.gte("data_finalizacao",dataInicio)
+.lte("data_finalizacao",dataFim);
 
-  }
+let totalComissao = 0;
 
-  async function calcular(){
+ordens?.forEach(o=>{
 
-    if(!funcionario) return;
+const porcentagem = o.profiles?.comissao || 0;
 
-    const {data:ordens} = await supabase
-    .from("ordens_servico")
-    .select(`
-      valor,
-      profiles(comissao)
-    `)
-    .eq("funcionario_id",funcionario)
-    .eq("status","finalizado")
-    .gte("data_finalizacao",dataInicio)
-    .lte("data_finalizacao",dataFim);
+totalComissao += (o.valor * porcentagem) / 100;
 
-    let totalComissao = 0;
+});
 
-    ordens?.forEach(o=>{
+const {data:adiantamentos} = await supabase
+.from("adiantamentos_funcionarios")
+.select("valor")
+.eq("funcionario_id",funcionario)
+.eq("descontado",false)
+.gte("data",dataInicio)
+.lte("data",dataFim);
 
-      const porcentagem = o.profiles?.comissao || 0;
+let totalAdiantamentos = 0;
 
-      totalComissao += (o.valor * porcentagem) / 100;
+adiantamentos?.forEach(a=>{
+totalAdiantamentos += Number(a.valor);
+});
 
-    })
+/* ALTERAÇÃO: cálculo do valor final */
+const totalPagar = totalComissao - totalAdiantamentos;
 
-    const {data:adiantamentos} = await supabase
-    .from("adiantamentos_funcionarios")
-    .select("valor")
-    .eq("funcionario_id",funcionario)
-    .gte("data",dataInicio)
-    .lte("data",dataFim);
+setResultado({
 
-    let totalAdiantamentos = 0;
+comissao:totalComissao,
+adiantamentos:totalAdiantamentos,
+pagar: totalPagar
 
-    adiantamentos?.forEach(a=>{
-      totalAdiantamentos += Number(a.valor);
-    })
+});
 
-    setResultado({
+}
 
-      comissao:totalComissao,
-      adiantamentos:totalAdiantamentos,
-      pagar: totalComissao - totalAdiantamentos
+async function registrarPagamento(){
 
-    });
+if(!resultado) return;
 
-  }
+await supabase
+.from("pagamentos_funcionarios")
+.insert({
 
-  function formatar(valor){
+funcionario_id: funcionario,
 
-    return Number(valor).toLocaleString("pt-BR",{
-      style:"currency",
-      currency:"BRL"
-    })
+data_inicio: dataInicio,
 
-  }
+data_fim: dataFim,
 
-  return(
+total_comissao: resultado.comissao,
 
-    <div className="p-8">
+total_adiantamentos: resultado.adiantamentos,
 
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 text-sm text-blue-600 hover:underline"
-        >
-          ← Voltar
-        </button>
+total_pago: resultado.pagar,
 
-      <h2 className="text-3xl font-bold mb-8">
-        Financeiro Funcionários
-      </h2>
+pago:true
 
-      <button
-        onClick={() => navigate("/adiantamentos")}
-        className="bg-gray-800 text-white px-4 py-2 rounded mb-8"
-        >
-        Ver histórico de adiantamentos
-        </button>
+});
 
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
+await supabase
+.from("adiantamentos_funcionarios")
+.update({descontado:true})
+.eq("funcionario_id",funcionario)
+.gte("data",dataInicio)
+.lte("data",dataFim);
 
-        <select
-        value={funcionario}
-        onChange={e=>setFuncionario(e.target.value)}
-        className="p-2 border rounded"
-        >
+alert("Pagamento registrado no histórico");
 
-          <option value="">Funcionário</option>
+setResultado(null);
 
-          {funcionarios.map(f=>(
-            <option key={f.id} value={f.id}>
-              {f.nome}
-            </option>
-          ))}
+}
 
-        </select>
+function formatar(valor){
 
-        <input
-        type="month"
-        value={mes}
-        onChange={e=>aplicarMes(e.target.value)}
-        className="p-2 border rounded"
-        />
+return Number(valor).toLocaleString("pt-BR",{
+style:"currency",
+currency:"BRL"
+});
 
-        <input
-        type="date"
-        value={dataInicio}
-        onChange={e=>setDataInicio(e.target.value)}
-        className="p-2 border rounded"
-        />
+}
 
-        <input
-        type="date"
-        value={dataFim}
-        onChange={e=>setDataFim(e.target.value)}
-        className="p-2 border rounded"
-        />
+return(
 
-      </div>
+<div className="p-8">
 
-      <button
-      onClick={calcular}
-      className="bg-blue-600 text-white px-6 py-2 rounded mb-10"
-      >
-      Calcular
-      </button>
+<button
+onClick={()=>navigate(-1)}
+className="mb-6 text-sm text-blue-600 hover:underline"
+>
+← Voltar
+</button>
 
-      {resultado && (
+<h2 className="text-3xl font-bold mb-6">
+Financeiro Funcionários
+</h2>
 
-        <div className="bg-white p-6 rounded shadow mb-10">
+<div className="flex gap-4 mb-8">
 
-          <p>
-            <strong>Total Comissões:</strong> {formatar(resultado.comissao)}
-          </p>
+<button
+onClick={()=>navigate("/adiantamentos")}
+className="bg-gray-800 text-white px-4 py-2 rounded"
+>
+Histórico de Adiantamentos
+</button>
 
-          <p>
-            <strong>Adiantamentos:</strong> {formatar(resultado.adiantamentos)}
-          </p>
+<button
+onClick={()=>navigate("/historico-pagamentos")}
+className="bg-indigo-700 text-white px-4 py-2 rounded"
+>
+Histórico de Pagamentos
+</button>
 
-          <p className="text-xl font-bold text-green-600">
-            Total a pagar: {formatar(resultado.pagar)}
-          </p>
+</div>
 
-        </div>
+<div className="grid md:grid-cols-4 gap-4 mb-8">
 
-      )}
+<select
+value={funcionario}
+onChange={e=>setFuncionario(e.target.value)}
+className="p-2 border rounded"
+>
 
-    </div>
+<option value="">Funcionário</option>
 
-  )
+{funcionarios.map(f=>(
+
+<option key={f.id} value={f.id}>
+{f.nome}
+</option>
+
+))}
+
+</select>
+
+<input
+type="month"
+value={mes}
+onChange={e=>aplicarMes(e.target.value)}
+className="p-2 border rounded"
+/>
+
+<input
+type="date"
+value={dataInicio}
+onChange={e=>setDataInicio(e.target.value)}
+className="p-2 border rounded"
+/>
+
+<input
+type="date"
+value={dataFim}
+onChange={e=>setDataFim(e.target.value)}
+className="p-2 border rounded"
+/>
+
+</div>
+
+<button
+onClick={calcular}
+className="bg-blue-600 text-white px-6 py-2 rounded mb-10"
+>
+Calcular
+</button>
+
+{resultado && (
+
+<div className="bg-white p-6 rounded shadow mb-10">
+
+<p>
+<strong>Total Comissões:</strong> {formatar(resultado.comissao)}
+</p>
+
+<p>
+<strong>Adiantamentos:</strong> {formatar(resultado.adiantamentos)}
+</p>
+
+<p className="text-xl font-bold text-green-600">
+Total a pagar: {formatar(resultado.pagar)}
+</p>
+
+<button
+onClick={registrarPagamento}
+className="bg-green-600 text-white px-6 py-2 rounded mt-4"
+>
+Marcar salário como pago
+</button>
+
+</div>
+
+)}
+
+</div>
+
+);
 
 }

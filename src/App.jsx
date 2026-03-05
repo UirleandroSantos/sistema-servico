@@ -13,6 +13,7 @@ import HistoricoCliente from "./pages/HistoricoCliente";
 import AdminGraficoFinanceiro from "./pages/AdminGraficoFinanceiro";
 import AdminFinanceiro from "./pages/AdminFinanceiro";
 import AdiantamentosFuncionarios from "./pages/AdiantamentosFuncionarios";
+import HistoricoPagamentos from "./pages/HistoricoPagamentos";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/admin/funcionarios/novo" element={<CadastrarFuncionario />} />
         <Route path="/admin/financeiro" element={<AdminFinanceiro />} />
         <Route path="/adiantamentos" element={<AdiantamentosFuncionarios />} />
+        <Route path="/historico-pagamentos" element={<HistoricoPagamentos />} />
       </Routes>
     </BrowserRouter>
   );
