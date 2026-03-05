@@ -163,7 +163,7 @@ export default function AdminClientes() {
           <div className="flex gap-3">
 
             <button
-              onClick={() => navigate("/admin/cadastrarcliente")}
+              onClick={() => navigate("/admin/clientes")}
               className="bg-green-600 text-white px-5 py-2 rounded-xl shadow hover:bg-green-700"
             >
               ➕ Novo Cliente
