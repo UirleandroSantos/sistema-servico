@@ -11,6 +11,7 @@ import AdminFinalizadas from "./pages/AdminFinalizadas";
 import TrocarSenha from "./pages/TrocarSenha";
 import HistoricoCliente from "./pages/HistoricoCliente";
 import AdminGraficoFinanceiro from "./pages/AdminGraficoFinanceiro";
+import AdminFinanceiro from "./pages/AdminFinanceiro";
 
 export default function App() {
   return (
@@ -27,8 +28,8 @@ export default function App() {
         <Route path="/admin/clientes/buscar" element={<AdminClientes />} />
         <Route path="/admin/historico/:id" element={<HistoricoCliente />} />
         <Route path="/admin/grafico" element={<AdminGraficoFinanceiro />} />
-        <Route path="/admin/funcionarios/novo" element={<CadastrarFuncionario />}
-/>
+        <Route path="/admin/funcionarios/novo" element={<CadastrarFuncionario />} />
+        <Route path="/admin/financeiro" element={<AdminFinanceiro />} />
       </Routes>
     </BrowserRouter>
   );

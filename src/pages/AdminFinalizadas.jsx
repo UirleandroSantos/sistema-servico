@@ -453,7 +453,6 @@ export default function AdminFinalizadas() {
             </div>
 
           )}
-
         </div>
 
       ))}
