@@ -106,7 +106,7 @@ export default function DashboardAdmin() {
           <div className="text-4xl mb-3">💰</div>
 
           <h3 className="text-xl font-bold">
-            Financeiro Funcionários
+            Gestão Financeira
           </h3>
 
           <p>Comissões e adiantamentos</p>

@@ -7,13 +7,19 @@ export default function DashboardEquipe() {
   const [usuario, setUsuario] = useState(null);
   const [ordens, setOrdens] = useState([]);
   const [totalComissao, setTotalComissao] = useState(0);
+
+  const [comissaoQ1, setComissaoQ1] = useState(0);
+  const [comissaoQ2, setComissaoQ2] = useState(0);
+
   const [mostrarFinalizados, setMostrarFinalizados] = useState(false);
+
+  const [mesFiltro, setMesFiltro] = useState("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsuario();
-  }, [mostrarFinalizados]);
+  }, [mostrarFinalizados, mesFiltro]);
 
   async function fetchUsuario() {
 
@@ -36,7 +42,7 @@ export default function DashboardEquipe() {
 
     const status = mostrarFinalizados ? "finalizado" : "pendente";
 
-    const { data: ordens } = await supabase
+    let query = supabase
       .from("ordens_servico")
       .select(`
         *,
@@ -49,22 +55,69 @@ export default function DashboardEquipe() {
       .eq("status", status)
       .order("created_at", { ascending: false });
 
+    if (mostrarFinalizados && mesFiltro) {
+
+      const [ano, mes] = mesFiltro.split("-");
+
+      const inicio = `${ano}-${mes}-01`;
+      const fim = new Date(ano, mes, 0)
+        .toISOString()
+        .split("T")[0];
+
+      query = query
+        .gte("data_finalizacao", inicio)
+        .lte("data_finalizacao", fim);
+
+    }
+
+    const { data: ordens } = await query;
+
     setOrdens(ordens || []);
+
+    /* =========================
+       CALCULO COMISSÕES
+    ========================= */
 
     const { data: ordensFinalizadas } = await supabase
       .from("ordens_servico")
-      .select("valor")
+      .select("valor,data_finalizacao")
       .eq("funcionario_id", userId)
       .eq("status", "finalizado");
 
     let total = 0;
+    let q1 = 0;
+    let q2 = 0;
+
     const porcentagem = profile?.comissao || 0;
 
     ordensFinalizadas?.forEach((o) => {
-      total += (Number(o.valor) * porcentagem) / 100;
+
+      const comissao = (Number(o.valor) * porcentagem) / 100;
+
+      total += comissao;
+
+      if (o.data_finalizacao) {
+
+        const dia = new Date(o.data_finalizacao).getDate();
+
+        if (dia <= 15) {
+
+          q1 += comissao;
+
+        } else {
+
+          q2 += comissao;
+
+        }
+
+      }
+
     });
 
     setTotalComissao(total);
+    setComissaoQ1(q1);
+    setComissaoQ2(q2);
+
   }
 
   async function finalizarOrdem(id) {
@@ -78,18 +131,24 @@ export default function DashboardEquipe() {
       .eq("id", id);
 
     if (!error) {
+
       fetchUsuario();
+
     } else {
+
       alert("Erro ao finalizar serviço");
+
     }
 
   }
 
   function formatar(valor) {
-    return valor.toLocaleString("pt-BR", {
+
+    return Number(valor).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
+
   }
 
   return (
@@ -113,17 +172,53 @@ export default function DashboardEquipe() {
 
       </div>
 
-      {/* COMISSÃO */}
+      {/* COMISSÕES */}
 
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-2xl shadow-lg mb-8">
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
 
-        <p className="text-sm opacity-80">
-          Comissão acumulada
-        </p>
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-2xl shadow-lg">
 
-        <h3 className="text-3xl font-bold">
-          {formatar(totalComissao)}
-        </h3>
+          <p className="text-sm opacity-80">
+            Comissão total
+          </p>
+
+          <h3 className="text-3xl font-bold">
+            {formatar(totalComissao)}
+          </h3>
+
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow">
+
+          <p className="text-gray-500 text-sm">
+            Comissão 1ª quinzena
+          </p>
+
+          <h3 className="text-2xl font-bold text-green-600">
+            {formatar(comissaoQ1)}
+          </h3>
+
+          <p className="text-xs text-gray-400">
+            Dias 01 - 15
+          </p>
+
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow">
+
+          <p className="text-gray-500 text-sm">
+            Comissão 2ª quinzena
+          </p>
+
+          <h3 className="text-2xl font-bold text-green-600">
+            {formatar(comissaoQ2)}
+          </h3>
+
+          <p className="text-xs text-gray-400">
+            Dias 16 - final do mês
+          </p>
+
+        </div>
 
       </div>
 
@@ -154,6 +249,23 @@ export default function DashboardEquipe() {
         </button>
 
       </div>
+
+      {/* FILTRO MÊS */}
+
+      {mostrarFinalizados && (
+
+        <div className="mb-6">
+
+          <input
+            type="month"
+            value={mesFiltro}
+            onChange={(e) => setMesFiltro(e.target.value)}
+            className="p-2 border rounded"
+          />
+
+        </div>
+
+      )}
 
       {/* TITULO */}
 

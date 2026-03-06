@@ -31,6 +31,7 @@ export default function ListaOrdens() {
           <p><strong>Funcionário:</strong> {o.profiles?.nome}</p>
           <p><strong>Serviço:</strong> {o.tipo_servico}</p>
           <p><strong>Valor:</strong> R$ {o.valor}</p>
+          {/* <p><strong>Observação: </strong>{o.observacoes}</p> */}
         </div>
       ))}
     </div>

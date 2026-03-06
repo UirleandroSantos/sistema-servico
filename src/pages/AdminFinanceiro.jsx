@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
 
 export default function AdminFinanceiro() {
 
 const navigate = useNavigate();
+
+const [modo,setModo] = useState("salarios");
 
 const [funcionarios,setFuncionarios] = useState([]);
 const [funcionario,setFuncionario] = useState("");
@@ -14,6 +17,9 @@ const [dataInicio,setDataInicio] = useState("");
 const [dataFim,setDataFim] = useState("");
 
 const [resultado,setResultado] = useState(null);
+
+const [contasReceber,setContasReceber] = useState([]);
+const [totalReceber,setTotalReceber] = useState(0);
 
 useEffect(()=>{
 buscarFuncionarios();
@@ -47,6 +53,10 @@ setDataInicio(inicio);
 setDataFim(fim);
 
 }
+
+/* ======================
+CALCULO SALARIO
+====================== */
 
 async function calcular(){
 
@@ -87,7 +97,6 @@ adiantamentos?.forEach(a=>{
 totalAdiantamentos += Number(a.valor);
 });
 
-/* ALTERAÇÃO: cálculo do valor final */
 const totalPagar = totalComissao - totalAdiantamentos;
 
 setResultado({
@@ -100,6 +109,126 @@ pagar: totalPagar
 
 }
 
+/* ======================
+CONTAS A RECEBER
+====================== */
+
+async function buscarContasReceber(){
+
+if(!dataInicio || !dataFim){
+
+alert("Selecione período");
+
+return;
+
+}
+
+const {data} = await supabase
+.from("ordens_servico")
+.select(`
+valor,
+tipo_servico,
+data_finalizacao,
+clientes(nome_cliente)
+`)
+.eq("status","finalizado")
+.gte("data_finalizacao",dataInicio)
+.lte("data_finalizacao",dataFim);
+
+const agrupado = {};
+
+let total = 0;
+
+data?.forEach(o=>{
+
+const cliente = o.clientes?.nome_cliente || "Sem nome";
+
+if(!agrupado[cliente]){
+
+agrupado[cliente] = {
+cliente,
+total:0,
+servicos:[]
+};
+
+}
+
+agrupado[cliente].servicos.push({
+
+servico:o.tipo_servico,
+valor:o.valor,
+data:o.data_finalizacao
+
+});
+
+agrupado[cliente].total += Number(o.valor);
+
+total += Number(o.valor);
+
+});
+
+setContasReceber(Object.values(agrupado));
+
+setTotalReceber(total);
+
+}
+
+/* ======================
+EXPORTAR PDF
+====================== */
+
+function exportarPDF(cliente){
+
+const pdf = new jsPDF();
+
+let y = 20;
+
+pdf.setFontSize(18);
+pdf.text("PET SHOP - COBRANÇA DE SERVIÇOS",20,y);
+
+y += 15;
+
+pdf.setFontSize(12);
+pdf.text(`Cliente: ${cliente.cliente}`,20,y);
+
+y += 10;
+
+pdf.text(`Data de emissão: ${new Date().toLocaleDateString("pt-BR")}`,20,y);
+
+y += 15;
+
+pdf.text("Serviços realizados:",20,y);
+
+y += 10;
+
+cliente.servicos.forEach((s)=>{
+
+const dataFormatada = s.data.split("-").reverse().join("/");
+
+pdf.text(`${dataFormatada} - ${s.servico} - ${formatar(s.valor)}`,20,y);
+
+y += 8;
+
+});
+
+y += 10;
+
+pdf.setFontSize(14);
+pdf.text(`TOTAL: ${formatar(cliente.total)}`,20,y);
+
+y += 20;
+
+pdf.setFontSize(10);
+pdf.text("Obrigado pela preferência!",20,y);
+
+pdf.save(`cobranca_${cliente.cliente}.pdf`);
+
+}
+
+/* ======================
+REGISTRAR PAGAMENTO
+====================== */
+
 async function registrarPagamento(){
 
 if(!resultado) return;
@@ -109,17 +238,11 @@ await supabase
 .insert({
 
 funcionario_id: funcionario,
-
 data_inicio: dataInicio,
-
 data_fim: dataFim,
-
 total_comissao: resultado.comissao,
-
 total_adiantamentos: resultado.adiantamentos,
-
 total_pago: resultado.pagar,
-
 pago:true
 
 });
@@ -131,7 +254,7 @@ await supabase
 .gte("data",dataInicio)
 .lte("data",dataFim);
 
-alert("Pagamento registrado no histórico");
+alert("Pagamento registrado");
 
 setResultado(null);
 
@@ -158,26 +281,32 @@ className="mb-6 text-sm text-blue-600 hover:underline"
 </button>
 
 <h2 className="text-3xl font-bold mb-6">
-Financeiro Funcionários
+Financeiro
 </h2>
 
-<div className="flex gap-4 mb-8">
+<div className="flex gap-4 mb-10">
 
 <button
-onClick={()=>navigate("/adiantamentos")}
-className="bg-gray-800 text-white px-4 py-2 rounded"
+onClick={()=>setModo("salarios")}
+className={`px-6 py-2 rounded ${modo==="salarios" ? "bg-blue-700 text-white":"bg-gray-300"}`}
 >
-Histórico de Adiantamentos
+Calcular salários
 </button>
 
 <button
-onClick={()=>navigate("/historico-pagamentos")}
-className="bg-indigo-700 text-white px-4 py-2 rounded"
+onClick={()=>setModo("receber")}
+className={`px-6 py-2 rounded ${modo==="receber" ? "bg-green-700 text-white":"bg-gray-300"}`}
 >
-Histórico de Pagamentos
+Ver contas a receber
 </button>
 
 </div>
+
+{/* SALÁRIOS */}
+
+{modo === "salarios" && (
+
+<div>
 
 <div className="grid md:grid-cols-4 gap-4 mb-8">
 
@@ -231,7 +360,7 @@ Calcular
 
 {resultado && (
 
-<div className="bg-white p-6 rounded shadow mb-10">
+<div className="bg-white p-6 rounded shadow">
 
 <p>
 <strong>Total Comissões:</strong> {formatar(resultado.comissao)}
@@ -251,6 +380,91 @@ className="bg-green-600 text-white px-6 py-2 rounded mt-4"
 >
 Marcar salário como pago
 </button>
+
+</div>
+
+)}
+
+</div>
+
+)}
+
+{/* CONTAS A RECEBER */}
+
+{modo === "receber" && (
+
+<div>
+
+<div className="grid md:grid-cols-3 gap-4 mb-8">
+
+<input
+type="month"
+value={mes}
+onChange={e=>aplicarMes(e.target.value)}
+className="p-2 border rounded"
+/>
+
+<input
+type="date"
+value={dataInicio}
+onChange={e=>setDataInicio(e.target.value)}
+className="p-2 border rounded"
+/>
+
+<input
+type="date"
+value={dataFim}
+onChange={e=>setDataFim(e.target.value)}
+className="p-2 border rounded"
+/>
+
+</div>
+
+<button
+onClick={buscarContasReceber}
+className="bg-green-700 text-white px-6 py-2 rounded mb-8"
+>
+Buscar
+</button>
+
+{contasReceber.length > 0 && (
+
+<div className="bg-white p-6 rounded shadow">
+
+<h3 className="text-2xl font-bold mb-6">
+Contas a Receber
+</h3>
+
+{contasReceber.map((c,i)=>(
+
+<div key={i} className="border-b pb-4 mb-4">
+
+<p className="font-bold text-lg">
+Cliente: {c.cliente}
+</p>
+
+<p className="text-green-700 font-semibold">
+Total: {formatar(c.total)}
+</p>
+
+<button
+onClick={()=>exportarPDF(c)}
+className="mt-3 bg-red-600 text-white px-4 py-2 rounded"
+>
+Exportar PDF cobrança
+</button>
+
+</div>
+
+))}
+
+<p className="text-2xl font-bold mt-6">
+Total Geral: {formatar(totalReceber)}
+</p>
+
+</div>
+
+)}
 
 </div>
 
