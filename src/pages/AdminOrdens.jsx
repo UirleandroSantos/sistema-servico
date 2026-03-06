@@ -2,28 +2,20 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { useNavigate } from "react-router-dom";
 
-export default function AdminFinalizadas() {
+export default function AdminOrdens() {
 
   const navigate = useNavigate();
 
   const [modo, setModo] = useState("pendentes");
-
   const [dados, setDados] = useState({});
   const [funcionarios, setFuncionarios] = useState([]);
-
   const [funcionarioSelecionado, setFuncionarioSelecionado] = useState("");
-
   const [buscaCliente, setBuscaCliente] = useState("");
-
   const [mesSelecionado, setMesSelecionado] = useState("");
-
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
-
   const [expandido, setExpandido] = useState(null);
-
   const [erroFiltro, setErroFiltro] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   const [resumoFinanceiro, setResumoFinanceiro] = useState({
@@ -34,18 +26,14 @@ export default function AdminFinalizadas() {
   });
 
   useEffect(() => {
-
     buscarFuncionarios();
     buscarPendentes();
-
   }, []);
 
   useEffect(() => {
-
     if (modo === "pendentes") {
       buscarPendentes();
     }
-
   }, [modo]);
 
   async function buscarFuncionarios() {
@@ -154,25 +142,19 @@ export default function AdminFinalizadas() {
     }
 
     const agrupado = {};
-
     let brutoTotal = 0;
-
     let totalComissoes = 0;
-
     const comissoes = {};
 
     data?.forEach((o) => {
 
       const nome = o.profiles?.nome || "Sem funcionário";
-
       const porcentagem = o.profiles?.comissao || 0;
-
       const valor = Number(o.valor);
 
       const comissao = (valor * porcentagem) / 100;
 
       brutoTotal += valor;
-
       totalComissoes += comissao;
 
       if (!agrupado[nome]) {
@@ -201,13 +183,32 @@ export default function AdminFinalizadas() {
     setLoading(false);
   }
 
-  function formatar(valor) {
+  async function cancelarOrdem(id) {
 
+    const confirmar = window.confirm("Tem certeza que deseja cancelar esta ordem?");
+
+    if (!confirmar) return;
+
+    const { error } = await supabase
+      .from("ordens_servico")
+      .update({
+        status: "cancelado"
+      })
+      .eq("id", id);
+
+    if (error) {
+      alert("Erro ao cancelar ordem");
+      return;
+    }
+
+    buscarPendentes();
+  }
+
+  function formatar(valor) {
     return Number(valor).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL"
     });
-
   }
 
   function formatarData(data) {
@@ -264,119 +265,6 @@ export default function AdminFinalizadas() {
 
       </div>
 
-      {modo === "finalizados" && (
-
-        <div className="bg-white p-4 rounded-xl shadow-md mb-6 flex flex-wrap gap-4 items-end">
-
-          <div>
-
-            <label className="text-sm text-gray-600">
-              Mês
-            </label>
-
-            <input
-              type="month"
-              value={mesSelecionado}
-              onChange={(e) => {
-                setMesSelecionado(e.target.value);
-                aplicarFiltroMes(e.target.value);
-              }}
-              className="block p-2 border rounded-lg"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="text-sm text-gray-600">
-              Data Início
-            </label>
-
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-              className="block p-2 border rounded-lg"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="text-sm text-gray-600">
-              Data Fim
-            </label>
-
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-              className="block p-2 border rounded-lg"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="text-sm text-gray-600">
-              Funcionário
-            </label>
-
-            <select
-              value={funcionarioSelecionado}
-              onChange={(e) => setFuncionarioSelecionado(e.target.value)}
-              className="block p-2 border rounded-lg"
-            >
-
-              <option value="">Todos</option>
-
-              {funcionarios.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.nome}
-                </option>
-              ))}
-
-            </select>
-
-          </div>
-
-          <button
-            onClick={buscarFinalizados}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg"
-          >
-            Consultar
-          </button>
-
-        </div>
-
-      )}
-
-      {modo === "finalizados" && !loading && (
-
-        <div className="bg-white p-4 rounded-xl shadow-md mb-6">
-
-          <p className="font-bold text-lg">
-            Faturamento bruto: {formatar(resumoFinanceiro.brutoTotal)}
-          </p>
-
-          <p className="text-red-600">
-            Total comissões: {formatar(resumoFinanceiro.totalComissoes)}
-          </p>
-
-          <p className="text-green-600 font-bold text-lg">
-            Lucro líquido: {formatar(resumoFinanceiro.lucroLiquido)}
-          </p>
-
-        </div>
-
-      )}
-
-      {erroFiltro && (
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
-          {erroFiltro}
-        </div>
-      )}
-
       {loading && <p>Carregando...</p>}
 
       {!loading && Object.entries(dados).map(([nome, ordens]) => (
@@ -421,30 +309,27 @@ export default function AdminFinalizadas() {
                       <strong>Serviço:</strong> {o.tipo_servico}
                     </p>
 
-                    {modo === "finalizados" && (
-                      <p>
-                        <strong>Data:</strong> {formatarData(o.data_finalizacao)}
-                      </p>
-                    )}
-
                     <p>
                       <strong>Valor:</strong> {formatar(o.valor)}
                     </p>
 
-                    {modo === "finalizados" && (
-                      <p>
-                        <strong>Comissão:</strong> {formatar(o.comissaoCalculada)}
-                      </p>
-                    )}
-
                     <p>
                       <strong>Status:</strong>
-
                       <span className="text-green-600 font-semibold ml-2">
                         {o.status}
                       </span>
-
                     </p>
+
+                    {modo === "pendentes" && (
+
+                      <button
+                        onClick={() => cancelarOrdem(o.id)}
+                        className="mt-3 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
+                      >
+                        Cancelar Ordem
+                      </button>
+
+                    )}
 
                   </div>
 
@@ -453,6 +338,7 @@ export default function AdminFinalizadas() {
             </div>
 
           )}
+
         </div>
 
       ))}

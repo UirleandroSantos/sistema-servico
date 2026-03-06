@@ -30,7 +30,7 @@ export default function DashboardAdmin() {
         </div>
 
         <div
-          onClick={() => navigate("/admin/finalizadas")}
+          onClick={() => navigate("/admin/ordens")}
           className="bg-gradient-to-r from-blue-500 to-indigo-600 p-8 rounded-3xl shadow-xl hover:scale-105 transition cursor-pointer text-white"
         >
 

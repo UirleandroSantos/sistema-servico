@@ -7,7 +7,7 @@ import AdminClientes from "./pages/AdminClientes";
 import CadastrarFuncionario from "./pages/CadastrarFuncionario";
 import GerenciarFuncionarios from "./pages/GerenciarFuncionarios";
 import NovaOrdem from "./pages/NovaOrdem";
-import AdminFinalizadas from "./pages/AdminFinalizadas";
+import AdminOrdens from "./pages/AdminOrdens";
 import TrocarSenha from "./pages/TrocarSenha";
 import HistoricoCliente from "./pages/HistoricoCliente";
 import AdminGraficoFinanceiro from "./pages/AdminGraficoFinanceiro";
@@ -24,7 +24,7 @@ export default function App() {
         <Route path="/admin/clientes" element={<CadastrarCliente />} />
         <Route path="/admin/funcionarios" element={<GerenciarFuncionarios />} />
         <Route path="/admin/ordem" element={<NovaOrdem />} />
-        <Route path="/admin/finalizadas" element={<AdminFinalizadas />} />
+        <Route path="/admin/ordens" element={<AdminOrdens />} />
         <Route path="/equipe" element={<DashboardEquipe />} />
         <Route path="/trocar-senha" element={<TrocarSenha />} />
         <Route path="/admin/clientes/buscar" element={<AdminClientes />} />
