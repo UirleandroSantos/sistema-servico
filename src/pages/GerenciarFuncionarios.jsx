@@ -19,11 +19,16 @@ export default function GerenciarFuncionarios() {
 
   async function buscarFuncionarios() {
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("role", "membro")
       .order("nome");
+
+    if (error) {
+      console.error(error);
+      return;
+    }
 
     setFuncionarios(data || []);
   }
@@ -76,7 +81,7 @@ export default function GerenciarFuncionarios() {
 
     setHistorico({
       ...historico,
-      [id]: data
+      [id]: data || []
     });
 
     setExpandido(id);
@@ -201,101 +206,8 @@ export default function GerenciarFuncionarios() {
 
       </div>
 
-      {editar && (
-
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-
-          <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg">
-
-            <h3 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              ✏️ Editar Funcionário
-            </h3>
-
-            <div className="space-y-4">
-
-              <div>
-                <label className="text-sm text-gray-600">Nome</label>
-                <input
-                  value={editar.nome}
-                  onChange={(e) =>
-                    setEditar({ ...editar, nome: e.target.value })
-                  }
-                  className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Sobrenome</label>
-                <input
-                  value={editar.sobrenome}
-                  onChange={(e) =>
-                    setEditar({ ...editar, sobrenome: e.target.value })
-                  }
-                  className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Telefone</label>
-                <input
-                  value={editar.telefone}
-                  onChange={(e) =>
-                    setEditar({ ...editar, telefone: e.target.value })
-                  }
-                  className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <input
-                  value={editar.email}
-                  onChange={(e) =>
-                    setEditar({ ...editar, email: e.target.value })
-                  }
-                  className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Comissão (%)</label>
-                <input
-                  type="number"
-                  value={editar.comissao}
-                  onChange={(e) =>
-                    setEditar({ ...editar, comissao: e.target.value })
-                  }
-                  className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-            </div>
-
-            <div className="flex justify-end gap-3 mt-8">
-
-              <button
-                onClick={() => setEditar(null)}
-                className="px-5 py-2 bg-gray-400 text-white rounded-xl hover:bg-gray-500 transition"
-              >
-                Cancelar
-              </button>
-
-              <button
-                onClick={salvarEdicao}
-                className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:scale-105 transition shadow-md"
-              >
-                Salvar
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
     </div>
 
   );
+
 }

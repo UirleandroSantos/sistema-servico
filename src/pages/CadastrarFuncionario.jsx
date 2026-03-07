@@ -29,50 +29,69 @@ export default function CadastrarFuncionario() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    try {
+
+      // tenta criar usuário
+      const { data, error } = await supabase.auth.signUp({
         email: email,
         password: "123456"
-        });
+      });
 
-        if (error) {
-        alert(error.message);
+      if (error && !error.message.includes("already registered")) {
+        throw error;
+      }
+
+      const user = data?.user || data?.session?.user;
+
+      if (!user) {
+        alert("Usuário já existe no Auth. Criando perfil...");
+      }
+
+      const userId = user?.id;
+
+      // verifica se profile já existe
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (existing) {
+        alert("Funcionário já existe.");
         setLoading(false);
         return;
-        }
+      }
 
-        const user = data.user || data.session?.user;
+      // cria profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            id: userId,
+            nome,
+            sobrenome,
+            telefone,
+            email,
+            role: "membro",
+            primeiro_login: true,
+            comissao
+          }
+        ]);
 
-    if (!user) {
-      alert("Erro ao criar usuário");
-      setLoading(false);
-      return;
+      if (profileError) throw profileError;
+
+      alert("Funcionário criado!\nSenha padrão: 123456");
+
+      navigate("/admin/funcionarios");
+
+    } catch (err) {
+
+      console.error(err);
+      alert("Erro ao criar funcionário");
+
     }
 
-    // cria profile
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert([
-        {
-          id: user.id,
-          nome: nome,
-          sobrenome: sobrenome,
-          telefone: telefone,
-          email: email,
-          role: "membro",
-          primeiro_login: true,
-          comissao: comissao
-        }
-      ]);
-
-    if (profileError) {
-      alert("Usuário criado mas erro ao salvar perfil");
-      setLoading(false);
-      return;
-    }
-
-    alert("Funcionário criado!\nSenha padrão: 123456");
-
-    navigate("/admin/funcionarios");
+    setLoading(false);
 
   }
 
@@ -101,7 +120,7 @@ export default function CadastrarFuncionario() {
             onChange={(e) =>
               setForm({ ...form, nome: e.target.value })
             }
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-xl"
           />
 
           <input
@@ -110,7 +129,7 @@ export default function CadastrarFuncionario() {
             onChange={(e) =>
               setForm({ ...form, sobrenome: e.target.value })
             }
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-xl"
           />
 
           <input
@@ -119,7 +138,7 @@ export default function CadastrarFuncionario() {
             onChange={(e) =>
               setForm({ ...form, telefone: e.target.value })
             }
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-xl"
           />
 
           <input
@@ -129,7 +148,7 @@ export default function CadastrarFuncionario() {
             onChange={(e) =>
               setForm({ ...form, email: e.target.value })
             }
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-xl"
           />
 
           <input
@@ -139,13 +158,13 @@ export default function CadastrarFuncionario() {
             onChange={(e) =>
               setForm({ ...form, comissao: e.target.value })
             }
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-xl"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition"
+            className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg"
           >
             {loading ? "Criando..." : "Criar Funcionário"}
           </button>
