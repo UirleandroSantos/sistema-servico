@@ -4,322 +4,389 @@ import { useNavigate } from "react-router-dom";
 
 export default function NovaOrdem() {
 
-  const navigate = useNavigate();
+const navigate = useNavigate();
 
-  function getHoje() {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-    const dia = String(hoje.getDate()).padStart(2, "0");
+function getHoje(){
+const hoje = new Date();
+const ano = hoje.getFullYear();
+const mes = String(hoje.getMonth()+1).padStart(2,"0");
+const dia = String(hoje.getDate()).padStart(2,"0");
+return `${ano}-${mes}-${dia}`;
+}
 
-    return `${ano}-${mes}-${dia}`;
-  }
+const [clientes,setClientes] = useState([]);
+const [funcionarios,setFuncionarios] = useState([]);
 
-  const [clientes, setClientes] = useState([]);
-  const [funcionarios, setFuncionarios] = useState([]);
-  const [buscaCliente, setBuscaCliente] = useState("");
-  const [clienteSelecionado, setClienteSelecionado] = useState(null);
+const [buscaCliente,setBuscaCliente] = useState("");
+const [clienteSelecionado,setClienteSelecionado] = useState(null);
 
-  const [form, setForm] = useState({
-    data_servico: getHoje(),
-    funcionario_id: "",
-    tipo_servico: "",
-    valor: "",
-    observacoes: "",
-  });
+const [ordensFila,setOrdensFila] = useState([]);
 
-  useEffect(() => {
+const [form,setForm] = useState({
+data_servico:getHoje(),
+funcionario_id:"",
+tipo_servico:"",
+valor:"",
+observacoes:""
+});
 
-    async function fetchData() {
+useEffect(()=>{
 
-      const { data: clientesData } = await supabase
-        .from("clientes")
-        .select("*");
+async function fetchData(){
 
-      const { data: funcionariosData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "membro");
+const {data:clientesData} = await supabase
+.from("clientes")
+.select("*");
 
-      setClientes(clientesData || []);
-      setFuncionarios(funcionariosData || []);
+const {data:funcionariosData} = await supabase
+.from("profiles")
+.select("*")
+.eq("role","membro");
 
-    }
-
-    fetchData();
-
-  }, []);
-
-  const clientesFiltrados = clientes.filter((c) =>
-    `${c.nome_cliente || ""} ${c.nome_pet || ""}`
-      .toLowerCase()
-      .includes(buscaCliente.toLowerCase())
-  );
-
-  async function handleSubmit(e) {
-
-  e.preventDefault();
-
-  if (!clienteSelecionado) {
-    alert("Selecione um cliente");
-    return;
-  }
-
-  if (!form.funcionario_id) {
-    alert("Selecione um funcionário");
-    return;
-  }
-
-  if (!form.tipo_servico) {
-    alert("Selecione o tipo de serviço");
-    return;
-  }
-
-  if (!form.valor) {
-    alert("Informe o valor");
-    return;
-  }
-
-  const dataFinal = form.data_servico
-    ? form.data_servico
-    : getHoje();
-
-  const { error } = await supabase
-    .from("ordens_servico")
-    .insert([
-      {
-        cliente_id: clienteSelecionado.id,
-        funcionario_id: form.funcionario_id,
-        tipo_servico: form.tipo_servico,
-        data_servico: dataFinal,
-        valor: Number(form.valor),
-        observacoes: form.observacoes,
-        status: "pendente",
-      },
-    ]);
-
-  if (error) {
-
-    console.log(error);
-    alert("Erro ao criar ordem");
-
-  } else {
-
-    alert("Ordem criada com sucesso!");
-
-    // 🔥 Limpa o formulário para criar outra ordem
-    setForm({
-      data_servico: getHoje(),
-      funcionario_id: "",
-      tipo_servico: "",
-      valor: "",
-      observacoes: "",
-    });
-
-    // 🔥 limpa cliente
-    setClienteSelecionado(null);
-    setBuscaCliente("");
-
-  }
+setClientes(clientesData || []);
+setFuncionarios(funcionariosData || []);
 
 }
 
-  return (
+fetchData();
 
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100 flex justify-center items-start p-8">
+},[]);
 
-      <div className="bg-white/90 backdrop-blur-lg w-full max-w-2xl p-8 rounded-3xl shadow-xl border">
+const clientesFiltrados = clientes.filter(c=>
+`${c.nome_cliente || ""} ${c.nome_pet || ""}`
+.toLowerCase()
+.includes(buscaCliente.toLowerCase())
+);
 
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 text-sm text-blue-600 hover:underline"
-        >
-          ← Voltar
-        </button>
+/* =========================
+SALVAR ORDEM NA FILA
+========================= */
 
-        <h2 className="text-3xl font-bold mb-8 text-gray-800 flex items-center gap-2">
-          🧾 Nova Ordem de Serviço
-        </h2>
+function salvarOrdem(e){
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+e.preventDefault();
 
-          {/* BUSCA CLIENTE */}
+if(!clienteSelecionado){
+alert("Selecione um cliente");
+return;
+}
 
-          <div className="relative">
+if(!form.funcionario_id){
+alert("Selecione um funcionário");
+return;
+}
 
-            <label className="text-sm text-gray-500">
-              Cliente / Pet
-            </label>
+if(!form.tipo_servico){
+alert("Selecione o serviço");
+return;
+}
 
-            <input
-              type="text"
-              placeholder="🔎 Pesquisar cliente ou pet..."
-              value={buscaCliente}
-              onChange={(e) => {
-                setBuscaCliente(e.target.value);
-                setClienteSelecionado(null);
-              }}
-              required
-              className="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition"
-            />
+if(!form.valor){
+alert("Informe o valor");
+return;
+}
 
-            {buscaCliente && !clienteSelecionado && (
+const novaOrdem = {
 
-              <div className="absolute w-full bg-white border rounded-xl shadow-lg max-h-48 overflow-y-auto mt-2 z-50">
+cliente_id:clienteSelecionado.id,
+funcionario_id:form.funcionario_id,
+tipo_servico:form.tipo_servico,
+data_servico:form.data_servico || getHoje(),
+valor:Number(form.valor),
+observacoes:form.observacoes,
+status:"pendente",
 
-                {clientesFiltrados.length === 0 && (
+cliente:clienteSelecionado
 
-                  <div className="p-3 text-gray-500 text-sm">
-                    Nenhum cliente encontrado
-                  </div>
+};
 
-                )}
+setOrdensFila([...ordensFila,novaOrdem]);
 
-                {clientesFiltrados.map((c) => (
+setForm({
+...form,
+tipo_servico:"",
+valor:"",
+observacoes:""
+});
 
-                  <div
-                    key={c.id}
-                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm transition"
-                    onClick={() => {
-                      setClienteSelecionado(c);
-                      setBuscaCliente(`${c.nome_cliente} - ${c.nome_pet}`);
-                    }}
-                  >
-                    <strong>{c.nome_cliente}</strong> — {c.nome_pet}
-                  </div>
+setClienteSelecionado(null);
+setBuscaCliente("");
 
-                ))}
+}
 
-              </div>
+/* =========================
+ENVIAR TODAS ORDENS
+========================= */
 
-            )}
+async function enviarOrdens(){
 
-          </div>
+if(ordensFila.length === 0){
+alert("Nenhuma ordem salva");
+return;
+}
 
-          <div className="grid md:grid-cols-2 gap-4">
+/* remove campo cliente que é apenas visual */
 
-            <div>
+const ordensParaSalvar = ordensFila.map(o => ({
+cliente_id: o.cliente_id,
+funcionario_id: o.funcionario_id,
+tipo_servico: o.tipo_servico,
+data_servico: o.data_servico,
+valor: o.valor,
+observacoes: o.observacoes,
+status: o.status
+}));
 
-              <label className="text-sm text-gray-500">
-                Funcionário
-              </label>
+const {error} = await supabase
+.from("ordens_servico")
+.insert(ordensParaSalvar);
 
-              <select
-                value={form.funcionario_id}
-                onChange={(e) =>
-                  setForm({ ...form, funcionario_id: e.target.value })
-                }
-                required
-                className="mt-1 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none"
-              >
+if(error){
 
-                <option value="">Selecione</option>
+console.log(error);
+alert("Erro ao enviar ordens");
 
-                {funcionarios.map((f) => (
+return;
 
-                  <option key={f.id} value={f.id}>
-                    {f.nome}
-                  </option>
+}
 
-                ))}
+alert("Ordens enviadas com sucesso!");
 
-              </select>
+setOrdensFila([]);
 
-            </div>
+setForm({
+data_servico:getHoje(),
+funcionario_id:"",
+tipo_servico:"",
+valor:"",
+observacoes:""
+});
 
-            <div>
+}
 
-              <label className="text-sm text-gray-500">
-                Tipo de serviço
-              </label>
+return(
 
-              <select
-                value={form.tipo_servico}
-                onChange={(e) =>
-                  setForm({ ...form, tipo_servico: e.target.value })
-                }
-                required
-                className="mt-1 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none"
-              >
+<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100 flex justify-center items-start p-8">
 
-                <option value="">Selecione</option>
-                <option>Banho</option>
-                <option>Tosa Higiênica</option>
-                <option>Tosa Completa</option>
-                <option>Outro</option>
+<div className="bg-white/90 backdrop-blur-lg w-full max-w-3xl p-8 rounded-3xl shadow-xl border">
 
-              </select>
+<button
+onClick={()=>navigate(-1)}
+className="mb-6 text-sm text-blue-600 hover:underline"
+>
+← Voltar
+</button>
 
-            </div>
+<h2 className="text-3xl font-bold mb-8 text-gray-800">
+🧾 Nova Ordem de Serviço
+</h2>
 
-            <div>
+<form onSubmit={salvarOrdem} className="space-y-5">
 
-              <label className="text-sm text-gray-500">
-                Data
-              </label>
+{/* FUNCIONÁRIO */}
 
-              <input
-                type="date"
-                value={form.data_servico}
-                onChange={(e) =>
-                  setForm({ ...form, data_servico: e.target.value })
-                }
-                className="mt-1 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none"
-              />
+<div>
 
-            </div>
+<label className="text-sm text-gray-500">
+Funcionário
+</label>
 
-            <div>
+<select
+value={form.funcionario_id}
+onChange={e=>setForm({...form,funcionario_id:e.target.value})}
+required
+className="mt-1 w-full p-3 border rounded-xl"
+>
 
-              <label className="text-sm text-gray-500">
-                Valor (R$)
-              </label>
+<option value="">Selecione</option>
 
-              <input
-                type="number"
-                placeholder="Ex: 50"
-                value={form.valor}
-                onChange={(e) =>
-                  setForm({ ...form, valor: e.target.value })
-                }
-                required
-                className="mt-1 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none"
-              />
+{funcionarios.map(f=>(
 
-            </div>
+<option key={f.id} value={f.id}>
+{f.nome}
+</option>
 
-          </div>
+))}
 
-          <div>
+</select>
 
-            <label className="text-sm text-gray-500">
-              Observações
-            </label>
+</div>
 
-            <textarea
-              placeholder="Observações do serviço..."
-              value={form.observacoes}
-              onChange={(e) =>
-                setForm({ ...form, observacoes: e.target.value })
-              }
-              className="mt-1 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+{/* BUSCA CLIENTE */}
 
-          </div>
+<div className="relative">
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 rounded-xl font-semibold text-lg hover:scale-[1.02] transition shadow-lg"
-          >
-            Criar Ordem de Serviço
-          </button>
+<label className="text-sm text-gray-500">
+Cliente / Pet
+</label>
 
-        </form>
+<input
+type="text"
+placeholder="🔎 Pesquisar cliente ou pet..."
+value={buscaCliente}
+onChange={(e)=>{
+setBuscaCliente(e.target.value);
+setClienteSelecionado(null);
+}}
+className="w-full mt-1 p-3 border rounded-xl"
+/>
 
-      </div>
+{buscaCliente && !clienteSelecionado && (
 
-    </div>
+<div className="absolute w-full bg-white border rounded-xl shadow-lg max-h-48 overflow-y-auto mt-2 z-50">
 
-  );
+{clientesFiltrados.length===0 && (
+
+<div className="p-3 text-gray-500 text-sm">
+Nenhum cliente encontrado
+</div>
+
+)}
+
+{clientesFiltrados.map(c=>(
+
+<div
+key={c.id}
+className="p-3 hover:bg-blue-50 cursor-pointer"
+onClick={()=>{
+setClienteSelecionado(c);
+setBuscaCliente(`${c.nome_cliente} - ${c.nome_pet}`);
+}}
+>
+<strong>{c.nome_cliente}</strong> — {c.nome_pet}
+</div>
+
+))}
+
+</div>
+
+)}
+
+</div>
+
+{/* DADOS SERVIÇO */}
+
+<div className="grid md:grid-cols-2 gap-4">
+
+<div>
+
+<label className="text-sm text-gray-500">
+Tipo de serviço
+</label>
+
+<select
+value={form.tipo_servico}
+onChange={e=>setForm({...form,tipo_servico:e.target.value})}
+className="mt-1 w-full p-3 border rounded-xl"
+>
+
+<option value="">Selecione</option>
+<option>Banho</option>
+<option>Tosa Higiênica</option>
+<option>Tosa Completa</option>
+<option>Outro</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label className="text-sm text-gray-500">
+Data
+</label>
+
+<input
+type="date"
+value={form.data_servico}
+onChange={e=>setForm({...form,data_servico:e.target.value})}
+className="mt-1 w-full p-3 border rounded-xl"
+/>
+
+</div>
+
+<div>
+
+<label className="text-sm text-gray-500">
+Valor
+</label>
+
+<input
+type="number"
+value={form.valor}
+onChange={e=>setForm({...form,valor:e.target.value})}
+className="mt-1 w-full p-3 border rounded-xl"
+/>
+
+</div>
+
+<div>
+
+<label className="text-sm text-gray-500">
+Observações
+</label>
+
+<input
+value={form.observacoes}
+onChange={e=>setForm({...form,observacoes:e.target.value})}
+className="mt-1 w-full p-3 border rounded-xl"
+/>
+
+</div>
+
+</div>
+
+<button
+type="submit"
+className="w-full bg-blue-600 text-white p-3 rounded-xl"
+>
+Salvar Ordem
+</button>
+
+</form>
+
+{/* FILA */}
+
+{ordensFila.length>0 && (
+
+<div className="mt-10">
+
+<h3 className="text-xl font-bold mb-4">
+Ordens na fila ({ordensFila.length})
+</h3>
+
+<div className="space-y-2">
+
+{ordensFila.map((o,i)=>(
+
+<div key={i} className="border p-3 rounded-lg">
+
+<p><strong>Cliente:</strong> {o.cliente.nome_cliente}</p>
+<p><strong>Pet:</strong> {o.cliente.nome_pet}</p>
+<p><strong>Serviço:</strong> {o.tipo_servico}</p>
+<p><strong>Valor:</strong> R$ {o.valor}</p>
+
+</div>
+
+))}
+
+</div>
+
+<button
+onClick={enviarOrdens}
+className="mt-6 bg-green-600 text-white px-6 py-3 rounded-xl"
+>
+📤 Enviar Ordens
+</button>
+
+</div>
+
+)}
+
+</div>
+
+</div>
+
+);
 
 }
