@@ -9,7 +9,7 @@ export default function DashboardAdmin() {
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-10">
 
       <h2 className="text-4xl font-bold mb-12 text-gray-800">
-        🐾 Painel do Administrador
+        🐾 Dr Tosa Administrador
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -45,6 +45,21 @@ export default function DashboardAdmin() {
         </div>
 
         <div
+          onClick={() => navigate("/admin/financeiro")}
+          className="bg-gradient-to-r from-emerald-500 to-green-600 p-8 rounded-3xl shadow-xl hover:scale-105 transition cursor-pointer text-white"
+        >
+
+          <div className="text-4xl mb-3">💰</div>
+
+          <h3 className="text-xl font-bold">
+            Gestão Financeira
+          </h3>
+
+          <p>Pagar e receber</p>
+
+        </div>
+
+        <div
           onClick={() => navigate("/admin/clientes/buscar")}
           className="bg-gradient-to-r from-purple-500 to-violet-600 p-8 rounded-3xl shadow-xl hover:scale-105 transition cursor-pointer text-white"
         >
@@ -54,7 +69,7 @@ export default function DashboardAdmin() {
           <h3 className="text-xl font-bold">
             Gerenciar Clientes
           </h3>
-
+          <p>Veja tudo sobre seus clientes</p>
         </div>
 
         <div
@@ -67,7 +82,7 @@ export default function DashboardAdmin() {
           <h3 className="text-xl font-bold">
             Cadastrar Cliente
           </h3>
-
+          <p>Cadastre um novo cliente</p>
         </div>
 
         <div
@@ -80,7 +95,7 @@ export default function DashboardAdmin() {
           <h3 className="text-xl font-bold">
             Funcionários
           </h3>
-
+        <p>Gerencie seus funcionários</p>
         </div>
 
         <div
@@ -93,25 +108,11 @@ export default function DashboardAdmin() {
           <h3 className="text-xl font-bold">
             Gráfico Financeiro
           </h3>
-
+          <p>Veja os resultados de cada mês</p>
         </div>
 
         {/* NOVO CARD FINANCEIRO */}
 
-        <div
-          onClick={() => navigate("/admin/financeiro")}
-          className="bg-gradient-to-r from-emerald-500 to-green-600 p-8 rounded-3xl shadow-xl hover:scale-105 transition cursor-pointer text-white"
-        >
-
-          <div className="text-4xl mb-3">💰</div>
-
-          <h3 className="text-xl font-bold">
-            Gestão Financeira
-          </h3>
-
-          <p>Comissões e adiantamentos</p>
-
-        </div>
 
       </div>
 

@@ -17,7 +17,6 @@ export default function Login() {
     });
 
     if (error) {
-      console.log(error);
       alert(error.message);
       return;
     }
@@ -28,16 +27,11 @@ export default function Login() {
       localStorage.removeItem("manterLogado");
     }
 
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("role, primeiro_login")
       .eq("id", data.user.id)
       .maybeSingle();
-
-    if (profileError) {
-      alert("Erro ao buscar perfil");
-      return;
-    }
 
     if (!profile) {
       alert("Perfil não encontrado.");
@@ -57,12 +51,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 px-4">
+
       <form
         onSubmit={handleLogin}
-        className="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md"
+        className="bg-white w-full max-w-md p-6 sm:p-10 rounded-2xl shadow-2xl"
       >
-        <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
+
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-gray-800">
           Sistema de Serviços
         </h2>
 
@@ -86,7 +82,7 @@ export default function Login() {
             required
           />
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-sm text-gray-600">
             <input
               type="checkbox"
               checked={manterConectado}
@@ -103,7 +99,9 @@ export default function Login() {
           </button>
 
         </div>
+
       </form>
+
     </div>
   );
 }
