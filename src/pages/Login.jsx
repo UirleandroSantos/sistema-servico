@@ -17,7 +17,8 @@ export default function Login() {
     });
 
     if (error) {
-      alert("Erro ao fazer login");
+      console.log(error);
+      alert(error.message);
       return;
     }
 
@@ -27,11 +28,16 @@ export default function Login() {
       localStorage.removeItem("manterLogado");
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role, primeiro_login")
       .eq("id", data.user.id)
       .maybeSingle();
+
+    if (profileError) {
+      alert("Erro ao buscar perfil");
+      return;
+    }
 
     if (!profile) {
       alert("Perfil não encontrado.");
