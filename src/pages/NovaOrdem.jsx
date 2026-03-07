@@ -282,8 +282,9 @@ className="mt-1 w-full p-3 border rounded-xl"
 
 <option value="">Selecione</option>
 <option>Banho</option>
-<option>Tosa Higiênica</option>
-<option>Tosa Completa</option>
+<option>Banho + Hidratação</option>
+<option>Banho + Tosa Higiênica</option>
+<option>Banho + Tosa Completa</option>
 <option>Outro</option>
 
 </select>
