@@ -18,7 +18,6 @@ const [dataFim,setDataFim] = useState("");
 
 const [resultado,setResultado] = useState(null);
 
-/* NOVO */
 const [resultadosTodos,setResultadosTodos] = useState([]);
 
 const [contasReceber,setContasReceber] = useState([]);
@@ -57,10 +56,6 @@ setDataFim(fim);
 
 }
 
-/* ======================
-CALCULO SALARIO
-====================== */
-
 async function calcular(){
 
 if(!funcionario) return;
@@ -86,35 +81,30 @@ totalComissao += (o.valor * porcentagem) / 100;
 
 });
 
-const {data:adiantamentos} = await supabase
-.from("adiantamentos_funcionarios")
+const {data:despesas} = await supabase
+.from("despesas_funcionarios")
 .select("valor")
 .eq("funcionario_id",funcionario)
-.eq("descontado",false)
 .gte("data",dataInicio)
 .lte("data",dataFim);
 
-let totalAdiantamentos = 0;
+let totalDespesas = 0;
 
-adiantamentos?.forEach(a=>{
-totalAdiantamentos += Number(a.valor);
+despesas?.forEach(d=>{
+totalDespesas += Number(d.valor);
 });
 
-const totalPagar = totalComissao - totalAdiantamentos;
+const totalPagar = totalComissao - totalDespesas;
 
 setResultado({
 
 comissao:totalComissao,
-adiantamentos:totalAdiantamentos,
+despesas:totalDespesas,
 pagar: totalPagar
 
 });
 
 }
-
-/* ======================
-NOVO - CALCULAR TODOS
-====================== */
 
 async function calcularTodos(){
 
@@ -143,28 +133,27 @@ totalComissao += (o.valor * porcentagem) / 100;
 
 });
 
-const {data:adiantamentos} = await supabase
-.from("adiantamentos_funcionarios")
+const {data:despesas} = await supabase
+.from("despesas_funcionarios")
 .select("valor")
 .eq("funcionario_id",f.id)
-.eq("descontado",false)
 .gte("data",dataInicio)
 .lte("data",dataFim);
 
-let totalAdiantamentos = 0;
+let totalDespesas = 0;
 
-adiantamentos?.forEach(a=>{
-totalAdiantamentos += Number(a.valor);
+despesas?.forEach(d=>{
+totalDespesas += Number(d.valor);
 });
 
-const totalPagar = totalComissao - totalAdiantamentos;
+const totalPagar = totalComissao - totalDespesas;
 
 lista.push({
 
 id:f.id,
 nome:f.nome,
 comissao:totalComissao,
-adiantamentos:totalAdiantamentos,
+despesas:totalDespesas,
 pagar:totalPagar
 
 });
@@ -174,10 +163,6 @@ pagar:totalPagar
 setResultadosTodos(lista);
 
 }
-
-/* ======================
-CONTAS A RECEBER
-====================== */
 
 async function buscarContasReceber(){
 
@@ -239,10 +224,6 @@ setTotalReceber(total);
 
 }
 
-/* ======================
-EXPORTAR PDF
-====================== */
-
 function exportarPDF(cliente){
 
 const pdf = new jsPDF();
@@ -291,10 +272,6 @@ pdf.save(`cobranca_${cliente.cliente}.pdf`);
 
 }
 
-/* ======================
-REGISTRAR PAGAMENTO
-====================== */
-
 async function registrarPagamento(){
 
 if(!resultado) return;
@@ -307,20 +284,22 @@ funcionario_id: funcionario,
 data_inicio: dataInicio,
 data_fim: dataFim,
 total_comissao: resultado.comissao,
-total_adiantamentos: resultado.adiantamentos,
+total_despesas: resultado.despesas,
 total_pago: resultado.pagar,
 pago:true
 
 });
 
+/* APAGAR DESPESAS DO PERÍODO */
+
 await supabase
-.from("adiantamentos_funcionarios")
-.update({descontado:true})
+.from("despesas_funcionarios")
+.delete()
 .eq("funcionario_id",funcionario)
 .gte("data",dataInicio)
 .lte("data",dataFim);
 
-alert("Pagamento registrado");
+alert("Pagamento registrado e despesas zeradas");
 
 setResultado(null);
 
@@ -367,8 +346,6 @@ Ver contas a receber
 </button>
 
 </div>
-
-{/* SALÁRIOS */}
 
 {modo === "salarios" && (
 
@@ -440,7 +417,7 @@ Calcular todos
 </p>
 
 <p>
-<strong>Adiantamentos:</strong> {formatar(resultado.adiantamentos)}
+<strong>Despesas:</strong> {formatar(resultado.despesas)}
 </p>
 
 <p className="text-xl font-bold text-green-600">
@@ -457,8 +434,6 @@ Marcar salário como pago
 </div>
 
 )}
-
-{/* NOVOS CARDS */}
 
 {resultadosTodos.length > 0 && (
 
@@ -477,7 +452,7 @@ Marcar salário como pago
 </p>
 
 <p>
-<strong>Adiantamentos:</strong> {formatar(r.adiantamentos)}
+<strong>Despesas:</strong> {formatar(r.despesas)}
 </p>
 
 <p className="text-green-700 font-bold text-lg">
@@ -495,8 +470,6 @@ Total a pagar: {formatar(r.pagar)}
 </div>
 
 )}
-
-{/* CONTAS A RECEBER */}
 
 {modo === "receber" && (
 

@@ -15,8 +15,6 @@ export default function DashboardAdmin() {
 
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 p-6 md:p-10">
 
-      {/* HEADER */}
-      
       <div className="mb-12 flex flex-col md:flex-row md:items-center md:justify-between">
 
         <div>
@@ -35,36 +33,24 @@ export default function DashboardAdmin() {
 
       </div>
 
-      {/* GRID */}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-
-        {/* NOVA ORDEM */}
 
         <div
           onClick={() => navigate("/admin/ordem")}
           className="relative col-span-1 md:col-span-2 bg-gradient-to-r from-green-500 to-emerald-600 p-10 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all cursor-pointer text-white overflow-hidden"
         >
 
-          <div className="absolute inset-0 opacity-20 bg-white blur-2xl"></div>
+          <div className="text-6xl mb-4">📝</div>
 
-          <div className="relative">
+          <h3 className="text-2xl font-bold mb-2">
+            Nova Ordem de Serviço
+          </h3>
 
-            <div className="text-6xl mb-4">📝</div>
-
-            <h3 className="text-2xl font-bold mb-2">
-              Nova Ordem de Serviço
-            </h3>
-
-            <p className="text-white/90">
-              Registrar novo atendimento
-            </p>
-
-          </div>
+          <p className="text-white/90">
+            Registrar novo atendimento
+          </p>
 
         </div>
-
-        {/* SERVIÇOS */}
 
         <div
           onClick={() => navigate("/admin/ordens")}
@@ -83,8 +69,6 @@ export default function DashboardAdmin() {
 
         </div>
 
-        {/* FINANCEIRO */}
-
         <div
           onClick={() => navigate("/admin/financeiro")}
           className="bg-gradient-to-r from-emerald-500 to-green-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
@@ -102,45 +86,22 @@ export default function DashboardAdmin() {
 
         </div>
 
-        {/* CLIENTES */}
-
         <div
-          onClick={() => navigate("/admin/clientes/buscar")}
-          className="bg-gradient-to-r from-purple-500 to-violet-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
+          onClick={() => navigate("/admin/despesas")}
+          className="bg-gradient-to-r from-red-500 to-rose-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
         >
 
-          <div className="text-5xl mb-3">👥</div>
+          <div className="text-5xl mb-3">💸</div>
 
           <h3 className="text-xl font-bold">
-            Gerenciar Clientes
+            Despesas
           </h3>
 
           <p className="text-white/90">
-            Veja tudo sobre seus clientes
+            Registrar despesas de funcionários
           </p>
 
         </div>
-
-        {/* CADASTRAR CLIENTE */}
-
-        <div
-          onClick={() => navigate("/admin/clientes")}
-          className="bg-gradient-to-r from-pink-500 to-rose-500 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
-        >
-
-          <div className="text-5xl mb-3">➕</div>
-
-          <h3 className="text-xl font-bold">
-            Cadastrar Cliente
-          </h3>
-
-          <p className="text-white/90">
-            Cadastre um novo cliente
-          </p>
-
-        </div>
-
-        {/* FUNCIONÁRIOS */}
 
         <div
           onClick={() => navigate("/admin/funcionarios")}
@@ -159,28 +120,7 @@ export default function DashboardAdmin() {
 
         </div>
 
-        {/* GRÁFICO */}
-
-        <div
-          onClick={() => navigate("/admin/grafico")}
-          className="bg-gradient-to-r from-cyan-500 to-blue-500 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
-        >
-
-          <div className="text-5xl mb-3">📊</div>
-
-          <h3 className="text-xl font-bold">
-            Gráfico Financeiro
-          </h3>
-
-          <p className="text-white/90">
-            Veja os resultados de cada mês
-          </p>
-
-        </div>
-
       </div>
-
-      {/* BOTÃO SAIR */}
 
       <div className="mt-16 flex justify-center">
 
