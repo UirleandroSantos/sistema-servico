@@ -97,11 +97,12 @@ export default function GerenciarFuncionarios() {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6">
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
 
         <button
+          type="button"
           onClick={() => navigate("/admin")}
           className="text-blue-600 hover:underline"
         >
@@ -109,8 +110,9 @@ export default function GerenciarFuncionarios() {
         </button>
 
         <button
+          type="button"
           onClick={() => navigate("/admin/funcionarios/novo")}
-          className="bg-green-600 text-white px-5 py-2 rounded-xl shadow-md hover:bg-green-700"
+          className="bg-green-600 text-white px-5 py-2 rounded-xl shadow-md hover:bg-green-700 active:scale-95"
         >
           ➕ Novo Funcionário
         </button>
@@ -139,76 +141,78 @@ export default function GerenciarFuncionarios() {
 
             {editar?.id === f.id ? (
 
-  <div className="bg-white p-6 rounded-xl space-y-4 text-gray-800">
+              <div className="bg-white p-6 rounded-xl space-y-4 text-gray-800">
 
-    <input
-      placeholder="Nome"
-      value={editar.nome}
-      onChange={(e) =>
-        setEditar({ ...editar, nome: e.target.value })
-      }
-      className="w-full p-3 border rounded-xl"
-    />
+                <input
+                  placeholder="Nome"
+                  value={editar.nome}
+                  onChange={(e) =>
+                    setEditar({ ...editar, nome: e.target.value })
+                  }
+                  className="w-full p-3 border rounded-xl"
+                />
 
-    <input
-      placeholder="Sobrenome"
-      value={editar.sobrenome}
-      onChange={(e) =>
-        setEditar({ ...editar, sobrenome: e.target.value })
-      }
-      className="w-full p-3 border rounded-xl"
-    />
+                <input
+                  placeholder="Sobrenome"
+                  value={editar.sobrenome}
+                  onChange={(e) =>
+                    setEditar({ ...editar, sobrenome: e.target.value })
+                  }
+                  className="w-full p-3 border rounded-xl"
+                />
 
-    <input
-      placeholder="Telefone"
-      value={editar.telefone || ""}
-      onChange={(e) =>
-        setEditar({ ...editar, telefone: e.target.value })
-      }
-      className="w-full p-3 border rounded-xl"
-    />
+                <input
+                  placeholder="Telefone"
+                  value={editar.telefone || ""}
+                  onChange={(e) =>
+                    setEditar({ ...editar, telefone: e.target.value })
+                  }
+                  className="w-full p-3 border rounded-xl"
+                />
 
-    <input
-      type="email"
-      placeholder="Email"
-      value={editar.email || ""}
-      onChange={(e) =>
-        setEditar({ ...editar, email: e.target.value })
-      }
-      className="w-full p-3 border rounded-xl"
-    />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={editar.email || ""}
+                  onChange={(e) =>
+                    setEditar({ ...editar, email: e.target.value })
+                  }
+                  className="w-full p-3 border rounded-xl"
+                />
 
-    <input
-      type="number"
-      placeholder="Comissão (%)"
-      value={editar.comissao || 0}
-      onChange={(e) =>
-        setEditar({ ...editar, comissao: e.target.value })
-      }
-      className="w-full p-3 border rounded-xl"
-    />
+                <input
+                  type="number"
+                  placeholder="Comissão (%)"
+                  value={editar.comissao || 0}
+                  onChange={(e) =>
+                    setEditar({ ...editar, comissao: e.target.value })
+                  }
+                  className="w-full p-3 border rounded-xl"
+                />
 
-    <div className="flex gap-3 pt-2">
+                <div className="flex gap-3 pt-2">
 
-      <button
-        onClick={salvarEdicao}
-        className="flex-1 py-2 bg-green-600 text-white rounded-xl"
-      >
-        Salvar
-      </button>
+                  <button
+                    type="button"
+                    onClick={salvarEdicao}
+                    className="flex-1 py-3 bg-green-600 text-white rounded-xl active:scale-95"
+                  >
+                    Salvar
+                  </button>
 
-      <button
-        onClick={() => setEditar(null)}
-        className="flex-1 py-2 bg-gray-500 text-white rounded-xl"
-      >
-        Cancelar
-      </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditar(null)}
+                    className="flex-1 py-3 bg-gray-500 text-white rounded-xl active:scale-95"
+                  >
+                    Cancelar
+                  </button>
 
-    </div>
+                </div>
 
-  </div>
+              </div>
 
-) : (
+            ) : (
 
               <>
 
@@ -223,22 +227,25 @@ export default function GerenciarFuncionarios() {
                 <div className="flex gap-3 mt-4 flex-wrap">
 
                   <button
+                    type="button"
                     onClick={() => setEditar({ ...f })}
-                    className="bg-white text-gray-800 px-3 py-1 rounded-lg"
+                    className="bg-white text-gray-800 px-4 py-2 rounded-lg active:scale-95"
                   >
                     ✏ Editar
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => excluirFuncionario(f.id)}
-                    className="bg-red-600 px-3 py-1 rounded-lg"
+                    className="bg-red-600 px-4 py-2 rounded-lg active:scale-95"
                   >
                     🗑 Excluir
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => verHistorico(f.id)}
-                    className="bg-blue-600 px-3 py-1 rounded-lg"
+                    className="bg-blue-600 px-4 py-2 rounded-lg active:scale-95"
                   >
                     📋 Histórico
                   </button>
