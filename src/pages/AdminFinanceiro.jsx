@@ -414,7 +414,7 @@ Calcular todos
 <div className="bg-white p-6 rounded shadow mb-8">
 
 <p>
-<strong>Total Comissões:</strong> {formatar(resultado.comissao)}
+<strong>Total Bruto:</strong> {formatar(resultado.comissao * 2)}
 </p>
 
 <p>
