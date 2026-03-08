@@ -297,8 +297,7 @@ export default function AdminFinanceiro() {
 
       });
 
-    /* APAGAR DESPESAS DO PERÍODO */
-
+    /* APAGAR DESPESAS E ZERAR RESULTADOS DO PERÍODO */
     await supabase
       .from("despesas_funcionarios")
       .delete()
@@ -306,9 +305,10 @@ export default function AdminFinanceiro() {
       .gte("data",dataInicio)
       .lte("data",dataFim);
 
-    alert("Pagamento registrado e despesas zeradas");
-
+    // Zerando variáveis
     setResultado(null);
+
+    alert("Pagamento registrado e valores zerados");
 
   }
 
