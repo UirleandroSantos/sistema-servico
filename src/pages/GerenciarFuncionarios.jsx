@@ -47,15 +47,17 @@ export default function GerenciarFuncionarios() {
 
   async function salvarEdicao() {
 
+    const dadosAtualizados = {
+      nome: editar.nome,
+      sobrenome: editar.sobrenome,
+      telefone: editar.telefone,
+      email: editar.email,
+      comissao: editar.comissao
+    };
+
     await supabase
       .from("profiles")
-      .update({
-        nome: editar.nome,
-        sobrenome: editar.sobrenome,
-        telefone: editar.telefone,
-        email: editar.email,
-        comissao: editar.comissao
-      })
+      .update(dadosAtualizados)
       .eq("id", editar.id);
 
     setEditar(null);
@@ -135,38 +137,117 @@ export default function GerenciarFuncionarios() {
             className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-2xl shadow-lg text-white"
           >
 
-            <h3 className="text-xl font-bold mb-2">
-              {f.nome} {f.sobrenome}
-            </h3>
+            {editar?.id === f.id ? (
 
-            <p>📞 {f.telefone}</p>
-            <p>✉ {f.email}</p>
-            <p>💰 Comissão: {f.comissao}%</p>
+  <div className="bg-white p-6 rounded-xl space-y-4 text-gray-800">
 
-            <div className="flex gap-3 mt-4 flex-wrap">
+    <input
+      placeholder="Nome"
+      value={editar.nome}
+      onChange={(e) =>
+        setEditar({ ...editar, nome: e.target.value })
+      }
+      className="w-full p-3 border rounded-xl"
+    />
 
-              <button
-                onClick={() => setEditar(f)}
-                className="bg-white text-gray-800 px-3 py-1 rounded-lg"
-              >
-                ✏ Editar
-              </button>
+    <input
+      placeholder="Sobrenome"
+      value={editar.sobrenome}
+      onChange={(e) =>
+        setEditar({ ...editar, sobrenome: e.target.value })
+      }
+      className="w-full p-3 border rounded-xl"
+    />
 
-              <button
-                onClick={() => excluirFuncionario(f.id)}
-                className="bg-red-600 px-3 py-1 rounded-lg"
-              >
-                🗑 Excluir
-              </button>
+    <input
+      placeholder="Telefone"
+      value={editar.telefone || ""}
+      onChange={(e) =>
+        setEditar({ ...editar, telefone: e.target.value })
+      }
+      className="w-full p-3 border rounded-xl"
+    />
 
-              <button
-                onClick={() => verHistorico(f.id)}
-                className="bg-blue-600 px-3 py-1 rounded-lg"
-              >
-                📋 Histórico
-              </button>
+    <input
+      type="email"
+      placeholder="Email"
+      value={editar.email || ""}
+      onChange={(e) =>
+        setEditar({ ...editar, email: e.target.value })
+      }
+      className="w-full p-3 border rounded-xl"
+    />
 
-            </div>
+    <input
+      type="number"
+      placeholder="Comissão (%)"
+      value={editar.comissao || 0}
+      onChange={(e) =>
+        setEditar({ ...editar, comissao: e.target.value })
+      }
+      className="w-full p-3 border rounded-xl"
+    />
+
+    <div className="flex gap-3 pt-2">
+
+      <button
+        onClick={salvarEdicao}
+        className="flex-1 py-2 bg-green-600 text-white rounded-xl"
+      >
+        Salvar
+      </button>
+
+      <button
+        onClick={() => setEditar(null)}
+        className="flex-1 py-2 bg-gray-500 text-white rounded-xl"
+      >
+        Cancelar
+      </button>
+
+    </div>
+
+  </div>
+
+) : (
+
+              <>
+
+                <h3 className="text-xl font-bold mb-2">
+                  {f.nome} {f.sobrenome}
+                </h3>
+
+                <p>📞 {f.telefone}</p>
+                <p>✉ {f.email}</p>
+                <p>💰 Comissão: {f.comissao}%</p>
+
+                <div className="flex gap-3 mt-4 flex-wrap">
+
+                  <button
+                    onClick={() => setEditar({ ...f })}
+                    className="bg-white text-gray-800 px-3 py-1 rounded-lg"
+                  >
+                    ✏ Editar
+                  </button>
+
+                  <button
+                    onClick={() => excluirFuncionario(f.id)}
+                    className="bg-red-600 px-3 py-1 rounded-lg"
+                  >
+                    🗑 Excluir
+                  </button>
+
+                  <button
+                    onClick={() => verHistorico(f.id)}
+                    className="bg-blue-600 px-3 py-1 rounded-lg"
+                  >
+                    📋 Histórico
+                  </button>
+
+                </div>
+
+              </>
+
+            )}
 
             {expandido === f.id && (
 

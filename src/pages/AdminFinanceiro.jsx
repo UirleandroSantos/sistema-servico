@@ -18,6 +18,9 @@ const [dataFim,setDataFim] = useState("");
 
 const [resultado,setResultado] = useState(null);
 
+/* NOVO */
+const [resultadosTodos,setResultadosTodos] = useState([]);
+
 const [contasReceber,setContasReceber] = useState([]);
 const [totalReceber,setTotalReceber] = useState(0);
 
@@ -106,6 +109,69 @@ adiantamentos:totalAdiantamentos,
 pagar: totalPagar
 
 });
+
+}
+
+/* ======================
+NOVO - CALCULAR TODOS
+====================== */
+
+async function calcularTodos(){
+
+let lista = [];
+
+for(const f of funcionarios){
+
+const {data:ordens} = await supabase
+.from("ordens_servico")
+.select(`
+valor,
+profiles(comissao)
+`)
+.eq("funcionario_id",f.id)
+.eq("status","finalizado")
+.gte("data_finalizacao",dataInicio)
+.lte("data_finalizacao",dataFim);
+
+let totalComissao = 0;
+
+ordens?.forEach(o=>{
+
+const porcentagem = o.profiles?.comissao || 0;
+
+totalComissao += (o.valor * porcentagem) / 100;
+
+});
+
+const {data:adiantamentos} = await supabase
+.from("adiantamentos_funcionarios")
+.select("valor")
+.eq("funcionario_id",f.id)
+.eq("descontado",false)
+.gte("data",dataInicio)
+.lte("data",dataFim);
+
+let totalAdiantamentos = 0;
+
+adiantamentos?.forEach(a=>{
+totalAdiantamentos += Number(a.valor);
+});
+
+const totalPagar = totalComissao - totalAdiantamentos;
+
+lista.push({
+
+id:f.id,
+nome:f.nome,
+comissao:totalComissao,
+adiantamentos:totalAdiantamentos,
+pagar:totalPagar
+
+});
+
+}
+
+setResultadosTodos(lista);
 
 }
 
@@ -353,14 +419,21 @@ className="p-2 border rounded"
 
 <button
 onClick={calcular}
-className="bg-blue-600 text-white px-6 py-2 rounded mb-10"
+className="bg-blue-600 text-white px-6 py-2 rounded mb-6"
 >
 Calcular
 </button>
 
+<button
+onClick={calcularTodos}
+className="bg-purple-700 text-white px-6 py-2 rounded mb-10 ml-4"
+>
+Calcular todos
+</button>
+
 {resultado && (
 
-<div className="bg-white p-6 rounded shadow">
+<div className="bg-white p-6 rounded shadow mb-8">
 
 <p>
 <strong>Total Comissões:</strong> {formatar(resultado.comissao)}
@@ -380,6 +453,40 @@ className="bg-green-600 text-white px-6 py-2 rounded mt-4"
 >
 Marcar salário como pago
 </button>
+
+</div>
+
+)}
+
+{/* NOVOS CARDS */}
+
+{resultadosTodos.length > 0 && (
+
+<div className="grid md:grid-cols-3 gap-6">
+
+{resultadosTodos.map((r,i)=>(
+
+<div key={i} className="bg-white p-6 rounded shadow">
+
+<h3 className="text-xl font-bold mb-4">
+{r.nome}
+</h3>
+
+<p>
+<strong>Comissão:</strong> {formatar(r.comissao)}
+</p>
+
+<p>
+<strong>Adiantamentos:</strong> {formatar(r.adiantamentos)}
+</p>
+
+<p className="text-green-700 font-bold text-lg">
+Total a pagar: {formatar(r.pagar)}
+</p>
+
+</div>
+
+))}
 
 </div>
 
