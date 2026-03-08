@@ -12,7 +12,7 @@ import TrocarSenha from "./pages/TrocarSenha";
 import HistoricoCliente from "./pages/HistoricoCliente";
 import AdminGraficoFinanceiro from "./pages/AdminGraficoFinanceiro";
 import AdminFinanceiro from "./pages/AdminFinanceiro";
-import AdiantamentosFuncionarios from "./pages/AdiantamentosFuncionarios";
+
 import HistoricoPagamentos from "./pages/HistoricoPagamentos";
 import AdminDespesas from "./pages/AdminDespesas";
 
@@ -33,7 +33,7 @@ export default function App() {
         <Route path="/admin/grafico" element={<AdminGraficoFinanceiro />} />
         <Route path="/admin/funcionarios/novo" element={<CadastrarFuncionario />} />
         <Route path="/admin/financeiro" element={<AdminFinanceiro />} />
-        <Route path="/adiantamentos" element={<AdiantamentosFuncionarios />} />
+        
         <Route path="/historico-pagamentos" element={<HistoricoPagamentos />} />
         <Route path="/admin/despesas" element={<AdminDespesas />} />
       </Routes>
