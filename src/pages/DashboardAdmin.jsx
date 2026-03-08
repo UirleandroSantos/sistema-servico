@@ -104,6 +104,40 @@ export default function DashboardAdmin() {
         </div>
 
         <div
+          onClick={() => navigate("/admin/clientes/buscar")}
+          className="bg-gradient-to-r from-purple-500 to-violet-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
+        >
+
+          <div className="text-5xl mb-3">👥</div>
+
+          <h3 className="text-xl font-bold">
+            Gerenciar Clientes
+          </h3>
+
+          <p className="text-white/90">
+            Veja tudo sobre seus clientes
+          </p>
+
+        </div>
+
+        <div
+          onClick={() => navigate("/admin/clientes")}
+          className="bg-gradient-to-r from-pink-500 to-rose-500 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
+        >
+
+          <div className="text-5xl mb-3">➕</div>
+
+          <h3 className="text-xl font-bold">
+            Cadastrar Cliente
+          </h3>
+
+          <p className="text-white/90">
+            Cadastre um novo cliente
+          </p>
+
+        </div>
+
+        <div
           onClick={() => navigate("/admin/funcionarios")}
           className="bg-gradient-to-r from-yellow-500 to-orange-500 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
         >
@@ -116,6 +150,23 @@ export default function DashboardAdmin() {
 
           <p className="text-white/90">
             Gerencie seus funcionários
+          </p>
+
+        </div>
+
+        <div
+          onClick={() => navigate("/admin/grafico")}
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
+        >
+
+          <div className="text-5xl mb-3">📊</div>
+
+          <h3 className="text-xl font-bold">
+            Gráfico Financeiro
+          </h3>
+
+          <p className="text-white/90">
+            Veja os resultados de cada mês
           </p>
 
         </div>

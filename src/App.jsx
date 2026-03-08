@@ -33,7 +33,6 @@ export default function App() {
         <Route path="/admin/grafico" element={<AdminGraficoFinanceiro />} />
         <Route path="/admin/funcionarios/novo" element={<CadastrarFuncionario />} />
         <Route path="/admin/financeiro" element={<AdminFinanceiro />} />
-        
         <Route path="/historico-pagamentos" element={<HistoricoPagamentos />} />
         <Route path="/admin/despesas" element={<AdminDespesas />} />
       </Routes>
