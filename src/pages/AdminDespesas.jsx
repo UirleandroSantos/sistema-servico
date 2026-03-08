@@ -18,9 +18,10 @@ buscarFuncionarios();
 
 async function buscarFuncionarios(){
 
-const {data} = await supabase
+const { data } = await supabase
 .from("profiles")
-.select("id,nome");
+.select("id,nome,role")
+.eq("role","membro"); // apenas funcionários
 
 setFuncionarios(data || []);
 
@@ -51,6 +52,7 @@ alert("Despesa registrada");
 
 setDescricao("");
 setValor("");
+setData("");
 
 }
 

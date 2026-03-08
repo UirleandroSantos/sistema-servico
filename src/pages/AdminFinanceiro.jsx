@@ -31,7 +31,8 @@ async function buscarFuncionarios(){
 
 const {data} = await supabase
 .from("profiles")
-.select("id,nome");
+.select("id,nome")
+.neq("role","admin")
 
 setFuncionarios(data || []);
 
