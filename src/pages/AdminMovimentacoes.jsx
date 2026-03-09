@@ -34,7 +34,7 @@ currency:"BRL"
 
 return(
 
-<div className="p-8 max-w-5xl mx-auto">
+<div className="p-4 md:p-8 max-w-5xl mx-auto">
 
 <button
 onClick={()=>navigate(-1)}
@@ -43,11 +43,13 @@ className="mb-6 text-sm text-blue-600 hover:underline"
 ← Voltar
 </button>
 
-<h2 className="text-3xl font-bold mb-8">
+<h2 className="text-2xl md:text-3xl font-bold mb-6">
 Movimentações Financeiras
 </h2>
 
-<div className="bg-white rounded shadow overflow-hidden">
+{/* DESKTOP - TABELA */}
+
+<div className="hidden md:block bg-white rounded shadow overflow-hidden">
 
 <table className="w-full">
 
@@ -69,7 +71,7 @@ Movimentações Financeiras
 
 {movimentos.map(m=>(
 
-<tr key={m.id} className="border-t">
+<tr key={m.id} className="border-t hover:bg-gray-50">
 
 <td className="p-3">
 
@@ -103,6 +105,47 @@ Movimentações Financeiras
 </tbody>
 
 </table>
+
+</div>
+
+{/* MOBILE - CARDS */}
+
+<div className="md:hidden space-y-4">
+
+{movimentos.map(m=>(
+
+<div
+key={m.id}
+className="bg-white p-4 rounded shadow"
+>
+
+<div className="flex justify-between items-center mb-2">
+
+<span className={`font-semibold ${m.tipo === "entrada" ? "text-green-600":"text-red-600"}`}>
+{m.tipo === "entrada" ? "Entrada":"Saída"}
+</span>
+
+<span className="text-sm text-gray-500">
+{new Date(m.data).toLocaleDateString()}
+</span>
+
+</div>
+
+<p className="text-sm text-gray-600 mb-2">
+{m.categoria}
+</p>
+
+<p className="text-sm mb-3">
+{m.descricao}
+</p>
+
+<p className="text-lg font-bold">
+{formatar(m.valor)}
+</p>
+
+</div>
+
+))}
 
 </div>
 
