@@ -298,24 +298,35 @@ export default function AdminFinanceiro() {
   }
   async function marcarComoPago(cliente){
 
-  // registrar movimentação financeira
-  await supabase
+  // verificar se já existe movimentação dessa ordem
+  const {data:existente} = await supabase
+  .from("movimentacoes_financeiras")
+  .select("id")
+  .eq("referencia_id", cliente.ordens[0])
+  .maybeSingle();
+
+  // se não existir, cria
+  if(!existente){
+
+    await supabase
     .from("movimentacoes_financeiras")
     .insert({
 
       tipo:"entrada",
       categoria:"cliente",
       descricao:`Pagamento cliente ${cliente.cliente}`,
-      valor: cliente.total,
-      referencia_id: cliente.ordens[0]
+      valor:cliente.total,
+      referencia_id:cliente.ordens[0]
 
     });
 
+  }
+
   // marcar ordens como pagas
   await supabase
-    .from("ordens_servico")
-    .update({ pago:true })
-    .in("id", cliente.ordens);
+  .from("ordens_servico")
+  .update({ pago:true })
+  .in("id", cliente.ordens);
 
   setContasReceber(contasReceber.filter(c => c.cliente !== cliente.cliente));
 
