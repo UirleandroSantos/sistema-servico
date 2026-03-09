@@ -298,6 +298,20 @@ export default function AdminFinanceiro() {
   }
   async function marcarComoPago(cliente){
 
+  // registrar movimentação financeira
+  await supabase
+    .from("movimentacoes_financeiras")
+    .insert({
+
+      tipo:"entrada",
+      categoria:"cliente",
+      descricao:`Pagamento cliente ${cliente.cliente}`,
+      valor: cliente.total,
+      referencia_id: cliente.ordens[0]
+
+    });
+
+  // marcar ordens como pagas
   await supabase
     .from("ordens_servico")
     .update({ pago:true })

@@ -87,6 +87,23 @@ export default function DashboardAdmin() {
         </div>
 
         <div
+          onClick={() => navigate("/admin/movimentacoes")}
+          className="bg-gradient-to-r from-teal-500 to-cyan-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
+        >
+
+          <div className="text-5xl mb-3">💳</div>
+
+          <h3 className="text-xl font-bold">
+            Movimentações Financeiras
+          </h3>
+
+          <p className="text-white/90">
+            Entradas e saídas do sistema
+          </p>
+
+        </div>
+
+        <div
           onClick={() => navigate("/admin/despesas")}
           className="bg-gradient-to-r from-red-500 to-rose-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
         >
