@@ -94,11 +94,11 @@ export default function DashboardAdmin() {
           <div className="text-5xl mb-3">💸</div>
 
           <h3 className="text-xl font-bold">
-            Despesas
+            Despesas e Vales
           </h3>
 
           <p className="text-white/90">
-            Registrar despesas de funcionários
+            Registrar despesas e vales de funcionários
           </p>
 
         </div>
