@@ -26,7 +26,6 @@ export default function AdminFinanceiro() {
   useEffect(()=>{
     buscarFuncionarios();
 
-    // Definir datas da primeira quinzena do mês atual
     const hoje = new Date();
     const ano = hoje.getFullYear();
     const mesAtual = String(hoje.getMonth() + 1).padStart(2, "0");
@@ -54,7 +53,6 @@ export default function AdminFinanceiro() {
 
     const [ano,mesNumero] = valor.split("-");
 
-    // Sempre considerar primeira quinzena
     const inicio = `${ano}-${mesNumero}-01`;
     const fim = `${ano}-${mesNumero}-15`;
 
@@ -88,25 +86,33 @@ export default function AdminFinanceiro() {
 
     });
 
-    const {data:despesas} = await supabase
+    const {data:registros} = await supabase
       .from("despesas_funcionarios")
-      .select("valor")
+      .select("valor,tipo")
       .eq("funcionario_id",funcionario)
       .gte("data",dataInicio)
       .lte("data",dataFim);
 
     let totalDespesas = 0;
+    let totalVales = 0;
 
-    despesas?.forEach(d=>{
-      totalDespesas += Number(d.valor) / 2;
+    registros?.forEach(d=>{
+
+      if(d.tipo === "vale"){
+        totalVales += Number(d.valor);
+      }else{
+        totalDespesas += Number(d.valor) / 2;
+      }
+
     });
 
-    const totalPagar = totalComissao - totalDespesas;
+    const totalPagar = totalComissao - totalDespesas - totalVales;
 
     setResultado({
 
       comissao:totalComissao,
       despesas:totalDespesas,
+      vales:totalVales,
       pagar: totalPagar
 
     });
@@ -140,20 +146,27 @@ export default function AdminFinanceiro() {
 
       });
 
-      const {data:despesas} = await supabase
+      const {data:registros} = await supabase
         .from("despesas_funcionarios")
-        .select("valor")
+        .select("valor,tipo")
         .eq("funcionario_id",f.id)
         .gte("data",dataInicio)
         .lte("data",dataFim);
 
       let totalDespesas = 0;
+      let totalVales = 0;
 
-      despesas?.forEach(d=>{
-        totalDespesas += Number(d.valor) / 2;
+      registros?.forEach(d=>{
+
+        if(d.tipo === "vale"){
+          totalVales += Number(d.valor);
+        }else{
+          totalDespesas += Number(d.valor) / 2;
+        }
+
       });
 
-      const totalPagar = totalComissao - totalDespesas;
+      const totalPagar = totalComissao - totalDespesas - totalVales;
 
       lista.push({
 
@@ -161,6 +174,7 @@ export default function AdminFinanceiro() {
         nome:f.nome,
         comissao:totalComissao,
         despesas:totalDespesas,
+        vales:totalVales,
         pagar:totalPagar
 
       });
@@ -292,12 +306,12 @@ export default function AdminFinanceiro() {
         data_fim: dataFim,
         total_comissao: resultado.comissao,
         total_despesas: resultado.despesas,
+        total_vales: resultado.vales,
         total_pago: resultado.pagar,
         pago:true
 
       });
 
-    /* APAGAR DESPESAS E ZERAR RESULTADOS DO PERÍODO */
     await supabase
       .from("despesas_funcionarios")
       .delete()
@@ -305,7 +319,6 @@ export default function AdminFinanceiro() {
       .gte("data",dataInicio)
       .lte("data",dataFim);
 
-    // Zerando variáveis
     setResultado(null);
 
     alert("Pagamento registrado e valores zerados");
@@ -427,6 +440,10 @@ export default function AdminFinanceiro() {
                 <strong>Despesas:</strong> {formatar(resultado.despesas)}
               </p>
 
+              <p>
+                <strong>Vales:</strong> {formatar(resultado.vales)}
+              </p>
+
               <p className="text-xl font-bold text-green-600">
                 Total a pagar: {formatar(resultado.pagar)}
               </p>
@@ -460,6 +477,10 @@ export default function AdminFinanceiro() {
 
                   <p>
                     <strong>Despesas:</strong> {formatar(r.despesas)}
+                  </p>
+
+                  <p>
+                    <strong>Vales:</strong> {formatar(r.vales)}
                   </p>
 
                   <p className="text-green-700 font-bold text-lg">

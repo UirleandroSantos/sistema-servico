@@ -8,6 +8,7 @@ export default function DashboardEquipe() {
   const [ordens, setOrdens] = useState([]);
   const [totalComissao, setTotalComissao] = useState(0);
   const [totalDespesas, setTotalDespesas] = useState(0);
+  const [totalVales, setTotalVales] = useState(0);
 
   const [mostrarFinalizados, setMostrarFinalizados] = useState(false);
   const [mesFiltro, setMesFiltro] = useState("");
@@ -65,7 +66,7 @@ export default function DashboardEquipe() {
     setOrdens(ordens || []);
 
     /* =========================
-       CALCULO COMISSÕES E DESPESAS
+       CALCULO COMISSÕES
     ========================= */
 
     const { data: ordensFinalizadas } = await supabase
@@ -83,23 +84,40 @@ export default function DashboardEquipe() {
       total += comissao;
     });
 
-    // BUSCAR DESPESAS DO FUNCIONÁRIO
+    /* =========================
+       BUSCAR DESPESAS E VALES
+    ========================= */
+
     let despesasTotal = 0;
-    const { data: despesas } = await supabase
+    let valesTotal = 0;
+
+    const { data: registros } = await supabase
       .from("despesas_funcionarios")
-      .select("valor")
+      .select("valor,tipo")
       .eq("funcionario_id", userId);
 
-    despesas?.forEach((d) => {
+    registros?.forEach((r) => {
 
-      // FUNCIONÁRIO PAGA APENAS METADE
-      despesasTotal += Number(d.valor) / 2;
+      if (r.tipo === "vale") {
+
+        // VALE desconta valor total
+        valesTotal += Number(r.valor);
+
+      } else {
+
+        // DESPESA funcionário paga metade
+        despesasTotal += Number(r.valor) / 2;
+
+      }
 
     });
 
-    // Total líquido = comissão - despesas
-    setTotalComissao(total - despesasTotal);
     setTotalDespesas(despesasTotal);
+    setTotalVales(valesTotal);
+
+    const liquido = total - despesasTotal - valesTotal;
+
+    setTotalComissao(liquido);
 
   }
 
@@ -144,19 +162,30 @@ export default function DashboardEquipe() {
 
       {/* COMISSÕES */}
       <div className="grid md:grid-cols-1 gap-6 mb-8">
+
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-2xl shadow-lg">
           <p className="text-sm opacity-80">
-            Comissão total (líquida de despesas)
+            Comissão líquida
           </p>
+
           <h3 className="text-3xl font-bold">
             {formatar(totalComissao)}
           </h3>
+
           {totalDespesas > 0 && (
             <p className="text-sm opacity-80 mt-2">
               (- {formatar(totalDespesas)} em despesas)
             </p>
           )}
+
+          {totalVales > 0 && (
+            <p className="text-sm opacity-80">
+              (- {formatar(totalVales)} em vales)
+            </p>
+          )}
+
         </div>
+
       </div>
 
       {/* BOTÕES */}
