@@ -196,16 +196,18 @@ export default function AdminFinanceiro() {
     }
 
     const {data} = await supabase
-      .from("ordens_servico")
-      .select(`
-        valor,
-        tipo_servico,
-        data_finalizacao,
-        clientes(nome_cliente)
-      `)
-      .eq("status","finalizado")
-      .gte("data_finalizacao",dataInicio)
-      .lte("data_finalizacao",dataFim);
+  .from("ordens_servico")
+  .select(`
+    id,
+    valor,
+    tipo_servico,
+    data_finalizacao,
+    clientes(nome_cliente)
+  `)
+  .eq("status","finalizado")
+  .eq("pago", false)
+  .gte("data_finalizacao",dataInicio)
+  .lte("data_finalizacao",dataFim);
 
     const agrupado = {};
 
@@ -220,7 +222,8 @@ export default function AdminFinanceiro() {
         agrupado[cliente] = {
           cliente,
           total:0,
-          servicos:[]
+          servicos:[],
+          ordens:[]
         };
 
       }
@@ -232,6 +235,7 @@ export default function AdminFinanceiro() {
         data:o.data_finalizacao
 
       });
+      agrupado[cliente].ordens.push(o.id);
 
       agrupado[cliente].total += Number(o.valor);
 
@@ -292,6 +296,16 @@ export default function AdminFinanceiro() {
     pdf.save(`cobranca_${cliente.cliente}.pdf`);
 
   }
+  async function marcarComoPago(cliente){
+
+  await supabase
+    .from("ordens_servico")
+    .update({ pago:true })
+    .in("id", cliente.ordens);
+
+  setContasReceber(contasReceber.filter(c => c.cliente !== cliente.cliente));
+
+}
 
   async function registrarPagamento(){
 
@@ -560,6 +574,13 @@ export default function AdminFinanceiro() {
                     className="mt-3 bg-red-600 text-white px-4 py-2 rounded"
                   >
                     Exportar PDF cobrança
+                  </button>
+
+                  <button
+                    onClick={()=>marcarComoPago(c)}
+                    className="mt-3 ml-3 bg-green-600 text-white px-4 py-2 rounded"
+                  >
+                    Marcar como pago
                   </button>
 
                 </div>
