@@ -98,7 +98,7 @@ export default function AdminFinanceiro() {
     let totalDespesas = 0;
 
     despesas?.forEach(d=>{
-      totalDespesas += Number(d.valor);
+      totalDespesas += Number(d.valor) / 2;
     });
 
     const totalPagar = totalComissao - totalDespesas;
@@ -150,7 +150,7 @@ export default function AdminFinanceiro() {
       let totalDespesas = 0;
 
       despesas?.forEach(d=>{
-        totalDespesas += Number(d.valor);
+        totalDespesas += Number(d.valor) / 2;
       });
 
       const totalPagar = totalComissao - totalDespesas;

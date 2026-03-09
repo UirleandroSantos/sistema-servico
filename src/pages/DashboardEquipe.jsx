@@ -91,7 +91,10 @@ export default function DashboardEquipe() {
       .eq("funcionario_id", userId);
 
     despesas?.forEach((d) => {
-      despesasTotal += Number(d.valor);
+
+      // FUNCIONÁRIO PAGA APENAS METADE
+      despesasTotal += Number(d.valor) / 2;
+
     });
 
     // Total líquido = comissão - despesas
