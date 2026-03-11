@@ -171,7 +171,7 @@ className="p-2 border rounded text-sm"
 
 <button
 onClick={salvar}
-className="bg-red-600 text-white py-2 rounded text-sm"
+className="bg-green-600 text-white py-2 rounded text-sm"
 >
 Salvar
 </button>
