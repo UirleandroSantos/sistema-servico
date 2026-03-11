@@ -81,6 +81,21 @@ buscarDespesas();
 
 }
 
+async function cancelarDespesa(id){
+
+const confirmar = confirm("Cancelar esta despesa?");
+
+if(!confirmar) return;
+
+await supabase
+.from("despesas_funcionarios")
+.delete()
+.eq("id",id);
+
+buscarDespesas();
+
+}
+
 function despesasPorFuncionario(id){
 
 return despesas.filter(d=>d.funcionario_id===id);
@@ -178,56 +193,41 @@ return(
 
 <div key={f.id} className="border rounded p-3 bg-white shadow-sm">
 
-<h3 className="font-semibold text-sm mb-2">
+<h3 className="font-semibold text-sm mb-3">
 {f.nome}
 </h3>
 
-<div className="overflow-x-auto">
-
-<table className="w-full text-xs">
-
-<thead>
-
-<tr className="border-b">
-
-<th className="py-1 text-left">Data</th>
-<th className="text-left">Motivo</th>
-<th className="text-left">Tipo</th>
-<th className="text-right">Valor</th>
-
-</tr>
-
-</thead>
-
-<tbody>
+<div className="flex flex-col gap-3">
 
 {lista.map(d=>(
 
-<tr key={d.id} className="border-b">
+<div key={d.id} className="border rounded p-3 bg-gray-50">
 
-<td className="py-1">
-{d.data}
-</td>
-
-<td>
-{d.descricao}
-</td>
-
-<td>
-{d.tipo}
-</td>
-
-<td className="text-right">
+<div className="flex justify-between text-xs mb-1">
+<span>{d.data}</span>
+<span className="font-semibold">
 R$ {Number(d.valor).toFixed(2)}
-</td>
+</span>
+</div>
 
-</tr>
+<p className="text-sm mb-1">
+{d.descricao}
+</p>
+
+<p className="text-xs text-gray-600 mb-2">
+Tipo: {d.tipo}
+</p>
+
+<button
+onClick={()=>cancelarDespesa(d.id)}
+className="w-full bg-red-500 text-white py-2 rounded text-sm active:scale-95"
+>
+Cancelar despesa
+</button>
+
+</div>
 
 ))}
-
-</tbody>
-
-</table>
 
 </div>
 
