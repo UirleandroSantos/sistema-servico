@@ -12,7 +12,8 @@ const [despesas,setDespesas] = useState([]);
 const [funcionario,setFuncionario] = useState("");
 const [descricao,setDescricao] = useState("");
 const [valor,setValor] = useState("");
-const [data,setData] = useState("");
+const hoje = new Date().toISOString().split("T")[0];
+const [data,setData] = useState(hoje);
 const [tipo,setTipo] = useState("despesa");
 
 useEffect(()=>{
