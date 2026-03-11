@@ -7,6 +7,8 @@ export default function AdminDespesas(){
 const navigate = useNavigate();
 
 const [funcionarios,setFuncionarios] = useState([]);
+const [despesas,setDespesas] = useState([]);
+
 const [funcionario,setFuncionario] = useState("");
 const [descricao,setDescricao] = useState("");
 const [valor,setValor] = useState("");
@@ -15,6 +17,7 @@ const [tipo,setTipo] = useState("despesa");
 
 useEffect(()=>{
 buscarFuncionarios();
+buscarDespesas();
 },[])
 
 async function buscarFuncionarios(){
@@ -25,6 +28,25 @@ const { data } = await supabase
 .eq("role","membro");
 
 setFuncionarios(data || []);
+
+}
+
+async function buscarDespesas(){
+
+const { data } = await supabase
+.from("despesas_funcionarios")
+.select(`
+id,
+descricao,
+valor,
+data,
+tipo,
+funcionario_id,
+profiles(nome)
+`)
+.order("data",{ascending:false});
+
+setDespesas(data || []);
 
 }
 
@@ -56,11 +78,19 @@ setDescricao("");
 setValor("");
 setData("");
 
+buscarDespesas();
+
+}
+
+function despesasPorFuncionario(id){
+
+return despesas.filter(d=>d.funcionario_id===id);
+
 }
 
 return(
 
-<div className="p-8 max-w-xl mx-auto">
+<div className="p-8 max-w-4xl mx-auto">
 
 <button
 onClick={()=>navigate(-1)}
@@ -73,7 +103,7 @@ className="mb-6 text-blue-600 hover:underline"
 Registrar Despesa / Vale
 </h2>
 
-<div className="flex flex-col gap-4">
+<div className="flex flex-col gap-4 mb-10">
 
 <select
 value={funcionario}
@@ -130,6 +160,79 @@ className="bg-red-600 text-white py-2 rounded"
 >
 Salvar
 </button>
+
+</div>
+
+<h2 className="text-2xl font-bold mb-6">
+Despesas e Vales por Funcionário
+</h2>
+
+<div className="flex flex-col gap-8">
+
+{funcionarios.map(f=>{
+
+const lista = despesasPorFuncionario(f.id);
+
+if(lista.length===0) return null;
+
+return(
+
+<div key={f.id} className="border rounded p-4 bg-white shadow">
+
+<h3 className="font-bold text-lg mb-3">
+{f.nome}
+</h3>
+
+<table className="w-full text-left">
+
+<thead>
+
+<tr className="border-b">
+
+<th className="py-2">Data</th>
+<th>Motivo</th>
+<th>Tipo</th>
+<th>Valor</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{lista.map(d=>(
+
+<tr key={d.id} className="border-b">
+
+<td className="py-2">
+{d.data}
+</td>
+
+<td>
+{d.descricao}
+</td>
+
+<td>
+{d.tipo}
+</td>
+
+<td>
+R$ {Number(d.valor).toFixed(2)}
+</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+</div>
+
+)
+
+})}
 
 </div>
 
