@@ -55,7 +55,6 @@ async function salvar(){
 if(!funcionario || !descricao || !valor){
 
 alert("Preencha todos os campos");
-
 return;
 
 }
@@ -90,25 +89,25 @@ return despesas.filter(d=>d.funcionario_id===id);
 
 return(
 
-<div className="p-8 max-w-4xl mx-auto">
+<div className="p-4 max-w-md mx-auto">
 
 <button
 onClick={()=>navigate(-1)}
-className="mb-6 text-blue-600 hover:underline"
+className="mb-4 text-blue-600 text-sm"
 >
 ← Voltar
 </button>
 
-<h2 className="text-3xl font-bold mb-6">
+<h2 className="text-xl font-bold mb-4">
 Registrar Despesa / Vale
 </h2>
 
-<div className="flex flex-col gap-4 mb-10">
+<div className="flex flex-col gap-2 mb-6">
 
 <select
 value={funcionario}
 onChange={e=>setFuncionario(e.target.value)}
-className="p-2 border rounded"
+className="p-2 border rounded text-sm"
 >
 
 <option value="">Funcionário</option>
@@ -126,17 +125,17 @@ className="p-2 border rounded"
 <select
 value={tipo}
 onChange={e=>setTipo(e.target.value)}
-className="p-2 border rounded"
+className="p-2 border rounded text-sm"
 >
-<option value="despesa">Despesa (50% funcionário)</option>
-<option value="vale">Vale (100% funcionário)</option>
+<option value="despesa">Despesa (50%)</option>
+<option value="vale">Vale (100%)</option>
 </select>
 
 <input
 placeholder="Descrição"
 value={descricao}
 onChange={e=>setDescricao(e.target.value)}
-className="p-2 border rounded"
+className="p-2 border rounded text-sm"
 />
 
 <input
@@ -144,30 +143,30 @@ type="number"
 placeholder="Valor"
 value={valor}
 onChange={e=>setValor(e.target.value)}
-className="p-2 border rounded"
+className="p-2 border rounded text-sm"
 />
 
 <input
 type="date"
 value={data}
 onChange={e=>setData(e.target.value)}
-className="p-2 border rounded"
+className="p-2 border rounded text-sm"
 />
 
 <button
 onClick={salvar}
-className="bg-red-600 text-white py-2 rounded"
+className="bg-red-600 text-white py-2 rounded text-sm"
 >
 Salvar
 </button>
 
 </div>
 
-<h2 className="text-2xl font-bold mb-6">
-Despesas e Vales por Funcionário
+<h2 className="text-lg font-bold mb-4">
+Despesas e Vales
 </h2>
 
-<div className="flex flex-col gap-8">
+<div className="flex flex-col gap-4">
 
 {funcionarios.map(f=>{
 
@@ -177,22 +176,24 @@ if(lista.length===0) return null;
 
 return(
 
-<div key={f.id} className="border rounded p-4 bg-white shadow">
+<div key={f.id} className="border rounded p-3 bg-white shadow-sm">
 
-<h3 className="font-bold text-lg mb-3">
+<h3 className="font-semibold text-sm mb-2">
 {f.nome}
 </h3>
 
-<table className="w-full text-left">
+<div className="overflow-x-auto">
+
+<table className="w-full text-xs">
 
 <thead>
 
 <tr className="border-b">
 
-<th className="py-2">Data</th>
-<th>Motivo</th>
-<th>Tipo</th>
-<th>Valor</th>
+<th className="py-1 text-left">Data</th>
+<th className="text-left">Motivo</th>
+<th className="text-left">Tipo</th>
+<th className="text-right">Valor</th>
 
 </tr>
 
@@ -204,7 +205,7 @@ return(
 
 <tr key={d.id} className="border-b">
 
-<td className="py-2">
+<td className="py-1">
 {d.data}
 </td>
 
@@ -216,7 +217,7 @@ return(
 {d.tipo}
 </td>
 
-<td>
+<td className="text-right">
 R$ {Number(d.valor).toFixed(2)}
 </td>
 
@@ -227,6 +228,8 @@ R$ {Number(d.valor).toFixed(2)}
 </tbody>
 
 </table>
+
+</div>
 
 </div>
 
