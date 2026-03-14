@@ -248,9 +248,9 @@ export default function DashboardEquipe() {
             <p className="text-gray-700">
               <strong>Serviço:</strong> {o.tipo_servico}
             </p>
-            <p className="text-gray-700">
+            {/* <p className="text-gray-700">
               <strong>Valor:</strong> {formatar(Number(o.valor))}
-            </p>
+            </p> */}
             <p className="text-gray-700">
               <strong>Status:</strong> {o.status}
             </p>
