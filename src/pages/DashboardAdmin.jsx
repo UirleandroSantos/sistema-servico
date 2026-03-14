@@ -70,6 +70,23 @@ export default function DashboardAdmin() {
         </div>
 
         <div
+          onClick={() => navigate("/admin/ordensfinalizadas")}
+          className="bg-gradient-to-r from-purple-600 to-indigo-700 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
+        >
+
+          <div className="text-5xl mb-3">📑</div>
+
+          <h3 className="text-xl font-bold">
+            Ordens Finalizadas
+          </h3>
+
+          <p className="text-white/90">
+            Histórico de serviços
+          </p>
+
+        </div>
+
+        {/* <div
           onClick={() => navigate("/admin/financeiro")}
           className="bg-gradient-to-r from-emerald-500 to-green-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.04] transition-all cursor-pointer text-white"
         >
@@ -84,7 +101,7 @@ export default function DashboardAdmin() {
             Pagar e receber
           </p>
 
-        </div>
+        </div> */}
 
         <div
           onClick={() => navigate("/admin/movimentacoes")}

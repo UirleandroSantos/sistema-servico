@@ -7,8 +7,12 @@ export default function AdminMovimentacoes(){
 const navigate = useNavigate();
 
 const hoje = new Date();
-const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-.toISOString().split("T")[0];
+
+const primeiroDiaMes = new Date(
+hoje.getFullYear(),
+hoje.getMonth(),
+1
+).toISOString().split("T")[0];
 
 const hojeFormatado = hoje.toISOString().split("T")[0];
 
@@ -16,10 +20,7 @@ const [dataInicio,setDataInicio] = useState(primeiroDiaMes);
 const [dataFim,setDataFim] = useState(hojeFormatado);
 
 const [movimentos,setMovimentos] = useState([]);
-const [entradaTotal,setEntradaTotal] = useState(0);
 const [saidaTotal,setSaidaTotal] = useState(0);
-
-const [filtroTipo,setFiltroTipo] = useState("todos");
 
 useEffect(()=>{
 buscarMovimentos();
@@ -27,61 +28,24 @@ buscarMovimentos();
 
 async function buscarMovimentos(){
 
-const {data:mov} = await supabase
+const {data} = await supabase
 .from("movimentacoes_financeiras")
 .select("*")
+.eq("tipo","saida")
 .gte("data",dataInicio)
-.lte("data",dataFim);
+.lte("data",dataFim)
+.order("data",{ascending:false});
 
-const {data:despesas} = await supabase
-.from("despesas_funcionarios")
-.select(`
-id,
-descricao,
-valor,
-data,
-tipo,
-profiles(nome)
-`)
-.gte("data",dataInicio)
-.lte("data",dataFim);
-
-const despesasConvertidas = (despesas || []).map(d=>({
-
-id:"despesa_"+d.id,
-tipo:"saida",
-categoria:d.tipo === "vale" ? "Vale Funcionário":"Despesa Funcionário",
-descricao:`${d.descricao} - ${d.profiles?.nome || ""}`,
-valor:d.valor,
-data:d.data,
-origem:"despesa",
-funcionario:d.profiles?.nome
-
-}));
-
-const lista = [
-...(mov || []),
-...despesasConvertidas
-];
-
-lista.sort((a,b)=> new Date(b.data) - new Date(a.data));
+const lista = data || [];
 
 setMovimentos(lista);
 
-let entrada = 0;
 let saida = 0;
 
 lista.forEach(m=>{
-
-if(m.tipo === "entrada"){
-entrada += Number(m.valor);
-}else{
 saida += Number(m.valor);
-}
-
 });
 
-setEntradaTotal(entrada);
 setSaidaTotal(saida);
 
 }
@@ -104,26 +68,6 @@ setDataFim(hoje);
 
 }
 
-function abrirDespesa(m){
-
-if(m.origem === "despesa"){
-
-alert(`Funcionário: ${m.funcionario}
-Descrição: ${m.descricao}
-Valor: ${formatar(m.valor)}`);
-
-}
-
-}
-
-const listaFiltrada = movimentos.filter(m=>{
-
-if(filtroTipo === "todos") return true;
-if(filtroTipo === "entrada") return m.tipo === "entrada";
-if(filtroTipo === "saida") return m.tipo === "saida";
-
-});
-
 return(
 
 <div className="p-4 md:p-8 max-w-5xl mx-auto">
@@ -136,7 +80,7 @@ className="mb-6 text-sm text-blue-600 hover:underline"
 </button>
 
 <h2 className="text-2xl md:text-3xl font-bold mb-6">
-Movimentações Financeiras
+PagamentosFuncionários
 </h2>
 
 {/* FILTROS */}
@@ -144,7 +88,10 @@ Movimentações Financeiras
 <div className="bg-white p-4 rounded shadow mb-6 flex flex-col md:flex-row gap-3 md:items-end">
 
 <div className="flex flex-col">
-<label className="text-sm text-gray-600">Data início</label>
+<label className="text-sm text-gray-600">
+Data início
+</label>
+
 <input
 type="date"
 value={dataInicio}
@@ -154,7 +101,10 @@ className="border p-2 rounded"
 </div>
 
 <div className="flex flex-col">
-<label className="text-sm text-gray-600">Data fim</label>
+<label className="text-sm text-gray-600">
+Data fim
+</label>
+
 <input
 type="date"
 value={dataFim}
@@ -181,33 +131,15 @@ Buscar
 
 {/* RESUMO */}
 
-<div className="grid grid-cols-2 gap-4 mb-6">
+<div className="mb-6">
 
-<div
-onClick={()=>setFiltroTipo("entrada")}
-className="bg-green-50 border border-green-200 p-4 rounded cursor-pointer hover:bg-green-100"
->
+<div className="bg-red-50 border border-red-200 p-4 rounded">
 
 <p className="text-sm text-gray-600">
-Entrada
+Total pago a funcionários
 </p>
 
-<p className="text-xl font-bold text-green-600">
-{formatar(entradaTotal)}
-</p>
-
-</div>
-
-<div
-onClick={()=>setFiltroTipo("saida")}
-className="bg-red-50 border border-red-200 p-4 rounded cursor-pointer hover:bg-red-100"
->
-
-<p className="text-sm text-gray-600">
-Saída
-</p>
-
-<p className="text-xl font-bold text-red-600">
+<p className="text-2xl font-bold text-red-600">
 {formatar(saidaTotal)}
 </p>
 
@@ -225,11 +157,21 @@ Saída
 
 <tr>
 
-<th className="p-3 text-left">Tipo</th>
-<th className="p-3 text-left">Categoria</th>
-<th className="p-3 text-left">Descrição</th>
-<th className="p-3 text-left">Valor</th>
-<th className="p-3 text-left">Data</th>
+<th className="p-3 text-left">
+Categoria
+</th>
+
+<th className="p-3 text-left">
+Descrição
+</th>
+
+<th className="p-3 text-left">
+Valor
+</th>
+
+<th className="p-3 text-left">
+Data
+</th>
 
 </tr>
 
@@ -237,22 +179,12 @@ Saída
 
 <tbody>
 
-{listaFiltrada.map(m=>(
+{movimentos.map(m=>(
 
 <tr
 key={m.id}
-onClick={()=>abrirDespesa(m)}
-className="border-t hover:bg-gray-50 cursor-pointer"
+className="border-t hover:bg-gray-50"
 >
-
-<td className="p-3">
-
-{m.tipo === "entrada"
-? <span className="text-green-600 font-semibold">Entrada</span>
-: <span className="text-red-600 font-semibold">Saída</span>
-}
-
-</td>
 
 <td className="p-3">
 {m.categoria}
@@ -262,7 +194,7 @@ className="border-t hover:bg-gray-50 cursor-pointer"
 {m.descricao}
 </td>
 
-<td className="p-3 font-semibold">
+<td className="p-3 font-semibold text-red-600">
 {formatar(m.valor)}
 </td>
 
@@ -284,18 +216,17 @@ className="border-t hover:bg-gray-50 cursor-pointer"
 
 <div className="md:hidden space-y-4">
 
-{listaFiltrada.map(m=>(
+{movimentos.map(m=>(
 
 <div
 key={m.id}
-onClick={()=>abrirDespesa(m)}
-className="bg-white p-4 rounded shadow cursor-pointer"
+className="bg-white p-4 rounded shadow"
 >
 
 <div className="flex justify-between items-center mb-2">
 
-<span className={`font-semibold ${m.tipo === "entrada" ? "text-green-600":"text-red-600"}`}>
-{m.tipo === "entrada" ? "Entrada":"Saída"}
+<span className="font-semibold text-red-600">
+Saída
 </span>
 
 <span className="text-sm text-gray-500">

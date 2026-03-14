@@ -60,13 +60,19 @@ return;
 
 }
 
+let valorFinal = Number(valor);
+
+if(tipo === "despesa"){
+valorFinal = valorFinal / 2;
+}
+
 await supabase
 .from("despesas_funcionarios")
 .insert({
 
 funcionario_id: funcionario,
 descricao,
-valor,
+valor: valorFinal,
 data,
 tipo
 
@@ -76,7 +82,7 @@ alert("Registro salvo");
 
 setDescricao("");
 setValor("");
-setData("");
+setData(hoje);
 
 buscarDespesas();
 

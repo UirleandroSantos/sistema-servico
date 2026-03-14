@@ -11,10 +11,11 @@ import AdminOrdens from "./pages/AdminOrdens";
 import TrocarSenha from "./pages/TrocarSenha";
 import HistoricoCliente from "./pages/HistoricoCliente";
 import AdminGraficoFinanceiro from "./pages/AdminGraficoFinanceiro";
-import AdminFinanceiro from "./pages/AdminFinanceiro";
+// import AdminFinanceiro from "./pages/AdminFinanceiro";
 import HistoricoPagamentos from "./pages/HistoricoPagamentos";
 import AdminDespesas from "./pages/AdminDespesas";
 import AdminMovimentacoes from "./pages/AdminMovimentacoes";
+import OrdensFinalizadas from "./pages/OrdensFinalizadas";
 
 export default function App() {
   return (
@@ -32,10 +33,11 @@ export default function App() {
         <Route path="/admin/historico/:id" element={<HistoricoCliente />} />
         <Route path="/admin/grafico" element={<AdminGraficoFinanceiro />} />
         <Route path="/admin/funcionarios/novo" element={<CadastrarFuncionario />} />
-        <Route path="/admin/financeiro" element={<AdminFinanceiro />} />
+        {/* <Route path="/admin/financeiro" element={<AdminFinanceiro />} /> */}
         <Route path="/historico-pagamentos" element={<HistoricoPagamentos />} />
         <Route path="/admin/despesas" element={<AdminDespesas />} />
         <Route path="/admin/movimentacoes" element={<AdminMovimentacoes/>} />
+        <Route path="/admin/ordensfinalizadas" element={<OrdensFinalizadas />} />
       </Routes>
     </BrowserRouter>
   );
