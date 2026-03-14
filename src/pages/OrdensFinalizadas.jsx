@@ -35,6 +35,21 @@ buscarFuncionarios();
 
 },[]);
 
+const channel = supabase
+  .channel("realtime-ordens-finalizadas")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "ordens_servico"
+    },
+    () => {
+      buscarDados();
+    }
+  )
+  .subscribe();
+
 async function buscarFuncionarios(){
 
 const { data } = await supabase

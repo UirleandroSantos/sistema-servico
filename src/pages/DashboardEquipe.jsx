@@ -163,7 +163,8 @@ export default function DashboardEquipe() {
       {/* COMISSÕES */}
       <div className="grid md:grid-cols-1 gap-6 mb-8">
 
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-2xl shadow-lg">
+        <h1 className="text-2xl font-bold text-gray-800">Gerenciador de Ordens</h1>
+        {/* <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-2xl shadow-lg">
           <p className="text-sm opacity-80">
             Comissão líquida
           </p>
@@ -184,7 +185,7 @@ export default function DashboardEquipe() {
             </p>
           )}
 
-        </div>
+        </div> */}
 
       </div>
 
