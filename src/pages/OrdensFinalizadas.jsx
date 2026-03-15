@@ -29,49 +29,72 @@ const [despesas,setDespesas] = useState(0);
 const [vales,setVales] = useState(0);
 const [liquido,setLiquido] = useState(0);
 
+/* BUSCAR FUNCIONÁRIOS */
+
 useEffect(()=>{
-
 buscarFuncionarios();
-
 },[]);
 
-const channel = supabase
-  .channel("realtime-ordens-finalizadas")
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "ordens_servico"
-    },
-    () => {
-      buscarDados();
-    }
-  )
-  .subscribe();
+/* REALTIME */
+
+useEffect(() => {
+
+  const channel = supabase
+    .channel("realtime-ordens-finalizadas")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "ordens_servico"
+      },
+      () => {
+        buscarDados();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+
+}, [funcionarioSelecionado, dataInicial, dataFinal]);
 
 async function buscarFuncionarios(){
 
-const { data } = await supabase
+const { data,error } = await supabase
 .from("profiles")
 .select("id,nome,role")
 .eq("role","membro");
+
+if(error){
+console.log(error);
+return;
+}
 
 setFuncionarios(data || []);
 
 }
 
+/* BUSCAR DADOS */
+
 async function buscarDados(){
 
 if(!funcionarioSelecionado) return;
 
+setServicos([]);
+
 const inicio = `${dataInicial}T00:00:00`;
 const fim = `${dataFinal}T23:59:59`;
 
-const { data:servicosData } = await supabase
+const { data:servicosData,error } = await supabase
 .from("ordens_servico")
 .select(`
-*,
+id,
+valor,
+tipo_servico,
+data_finalizacao,
+pago_funcionario,
 clientes(
 nome_cliente,
 nome_pet
@@ -83,7 +106,17 @@ nome_pet
 .lte("data_finalizacao",fim)
 .order("data_finalizacao",{ascending:false});
 
-setServicos(servicosData || []);
+if(error){
+console.log("Erro ao buscar serviços:",error);
+setServicos([]);
+return;
+}
+
+console.log("Serviços vindos do banco:",servicosData);
+
+setServicos(servicosData ?? []);
+
+/* VERIFICAR SE JÁ FOI PAGO */
 
 let pago = true;
 
@@ -95,6 +128,8 @@ pago = false;
 
 setJaPago(pago && (servicosData || []).length > 0);
 
+/* CALCULAR BRUTO */
+
 let bruto = 0;
 
 (servicosData || []).forEach(s=>{
@@ -102,6 +137,8 @@ bruto += Number(s.valor);
 });
 
 setValorBruto(bruto);
+
+/* BUSCAR DESPESAS */
 
 const { data:despesasData } = await supabase
 .from("despesas_funcionarios")
@@ -143,6 +180,8 @@ currency:"BRL"
 
 }
 
+/* PAGAR FUNCIONÁRIO */
+
 async function pagarFuncionario(){
 
 if(!funcionarioSelecionado) return;
@@ -153,8 +192,6 @@ if(!confirmar) return;
 const hoje = new Date().toISOString().split("T")[0];
 
 try{
-
-/* 1️⃣ SALVAR HISTÓRICO */
 
 await supabase
 .from("pagamentos_funcionarios")
@@ -170,9 +207,6 @@ data_pagamento: hoje
 
 });
 
-
-/* 2️⃣ REGISTRAR SAÍDA FINANCEIRA */
-
 await supabase
 .from("movimentacoes_financeiras")
 .insert({
@@ -185,9 +219,6 @@ data: hoje
 
 });
 
-
-/* 3️⃣ MARCAR SERVIÇOS COMO PAGOS */
-
 await supabase
 .from("ordens_servico")
 .update({ pago_funcionario: true })
@@ -196,16 +227,10 @@ await supabase
 .gte("data_finalizacao",`${dataInicial}T00:00:00`)
 .lte("data_finalizacao",`${dataFinal}T23:59:59`);
 
-
-/* 4️⃣ APAGAR DESPESAS */
-
 await supabase
 .from("despesas_funcionarios")
 .delete()
 .eq("funcionario_id",funcionarioSelecionado.id);
-
-
-/* 5️⃣ LIMPAR TELA */
 
 setServicos([]);
 setValorBruto(0);
@@ -223,6 +248,8 @@ alert("Erro ao registrar pagamento");
 }
 
 }
+
+/* TELA DE FUNCIONÁRIOS */
 
 if(!funcionarioSelecionado){
 
@@ -262,6 +289,8 @@ className="p-3 border rounded bg-white shadow cursor-pointer hover:bg-gray-100"
 )
 
 }
+
+/* TELA PRINCIPAL */
 
 return(
 
@@ -348,10 +377,7 @@ Pagar Funcionário
 
 )}
 
-
 </div>
-
-{/* LISTA DE SERVIÇOS */}
 
 <div className="flex flex-col gap-3">
 
@@ -367,7 +393,7 @@ Cliente: {s.clientes?.nome_cliente}
 </p>
 
 <p className="text-sm font-semibold">
-Cliente: {s.clientes?.nome_pet}
+Pet: {s.clientes?.nome_pet}
 </p>
 
 <p className="text-sm">
