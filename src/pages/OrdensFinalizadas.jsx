@@ -357,7 +357,7 @@ Vales: {formatar(vales)}
 <hr className="my-2"/>
 
 <p className="text-lg font-bold">
-Valor líquido: {formatar(valorBruto)}
+Valor bruto: {formatar(valorBruto)}
 </p>
 
 {jaPago ? (
