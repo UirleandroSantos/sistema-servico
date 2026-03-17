@@ -60,11 +60,11 @@ export default function DashboardAdmin() {
           <div className="text-5xl mb-3">📋</div>
 
           <h3 className="text-xl font-bold">
-            Gerenciar Serviços
+            Ordens Pendentes
           </h3>
 
           <p className="text-white/90">
-            Pendentes e Finalizados
+            Ver Ordens Pendentes
           </p>
 
         </div>
@@ -81,7 +81,7 @@ export default function DashboardAdmin() {
           </h3>
 
           <p className="text-white/90">
-            Histórico de serviços
+            Ver Ordens Finalizadas
           </p>
 
         </div>

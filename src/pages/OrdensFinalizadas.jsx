@@ -342,7 +342,7 @@ Buscar
 Serviços finalizados: {servicos.length}
 </p>
 
-<p className="text-sm mb-1">
+{/* <p className="text-sm mb-1">
 Valor bruto: {formatar(valorBruto)}
 </p>
 
@@ -352,12 +352,12 @@ Despesas: {formatar(despesas)}
 
 <p className="text-sm mb-1">
 Vales: {formatar(vales)}
-</p>
+</p> */}
 
 <hr className="my-2"/>
 
 <p className="text-lg font-bold">
-Valor líquido: {formatar(liquido)}
+Valor líquido: {formatar(valorBruto)}
 </p>
 
 {jaPago ? (
