@@ -21,6 +21,10 @@ const hoje = new Date().toISOString().split("T")[0];
 const [data,setData] = useState(hoje);
 const [tipo,setTipo] = useState("despesa");
 
+/* 🔥 FILTRO */
+const [dataInicio, setDataInicio] = useState("");
+const [dataFim, setDataFim] = useState("");
+
 /* =========================
 BUSCAR FUNCIONÁRIOS
 ========================= */
@@ -41,7 +45,7 @@ setFuncionarios(data || []);
 }
 
 /* =========================
-BUSCAR DESPESAS
+BUSCAR DESPESAS (COM FILTRO)
 ========================= */
 
 useEffect(()=>{
@@ -54,11 +58,20 @@ async function buscarDespesas(){
 
 if(!funcionarioSelecionado) return;
 
-const { data } = await supabase
+let query = supabase
 .from("despesas_funcionarios")
 .select("*")
-.eq("funcionario_id",funcionarioSelecionado.id)
-.order("data",{ascending:false});
+.eq("funcionario_id",funcionarioSelecionado.id);
+
+if(dataInicio){
+query = query.gte("data", dataInicio);
+}
+
+if(dataFim){
+query = query.lte("data", dataFim);
+}
+
+const { data } = await query.order("data",{ascending:false});
 
 setDespesas(data || []);
 
@@ -127,7 +140,7 @@ currency:"BRL"
 }
 
 /* =========================
-🔥 TOTAIS
+TOTAIS
 ========================= */
 
 const totalVales = despesas
@@ -247,7 +260,34 @@ Salvar
 
 </div>
 
-{/* 🔥 TOTAIS */}
+{/* 🔥 FILTRO DE DATA */}
+
+<div className="flex flex-col gap-2 mb-4">
+
+<input
+type="date"
+value={dataInicio}
+onChange={e=>setDataInicio(e.target.value)}
+className="p-2 border rounded"
+/>
+
+<input
+type="date"
+value={dataFim}
+onChange={e=>setDataFim(e.target.value)}
+className="p-2 border rounded"
+/>
+
+<button
+onClick={buscarDespesas}
+className="bg-blue-600 text-white py-2 rounded"
+>
+Filtrar
+</button>
+
+</div>
+
+{/* TOTAIS */}
 
 <div className="mb-4">
 
