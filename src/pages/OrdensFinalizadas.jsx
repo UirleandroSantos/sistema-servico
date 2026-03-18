@@ -112,8 +112,6 @@ setServicos([]);
 return;
 }
 
-console.log("Serviços vindos do banco:",servicosData);
-
 setServicos(servicosData ?? []);
 
 /* VERIFICAR SE JÁ FOI PAGO */
@@ -177,75 +175,6 @@ return Number(valor).toLocaleString("pt-BR",{
 style:"currency",
 currency:"BRL"
 });
-
-}
-
-/* PAGAR FUNCIONÁRIO */
-
-async function pagarFuncionario(){
-
-if(!funcionarioSelecionado) return;
-
-const confirmar = confirm("Confirmar pagamento do funcionário?");
-if(!confirmar) return;
-
-const hoje = new Date().toISOString().split("T")[0];
-
-try{
-
-await supabase
-.from("pagamentos_funcionarios")
-.insert({
-
-funcionario_id: funcionarioSelecionado.id,
-funcionario_nome: funcionarioSelecionado.nome,
-valor_bruto: valorBruto,
-despesas: despesas,
-vales: vales,
-valor_liquido: liquido,
-data_pagamento: hoje
-
-});
-
-await supabase
-.from("movimentacoes_financeiras")
-.insert({
-
-tipo:"saida",
-categoria:"Pagamento Funcionário",
-descricao:`Pagamento de serviços - ${funcionarioSelecionado.nome}`,
-valor: liquido,
-data: hoje
-
-});
-
-await supabase
-.from("ordens_servico")
-.update({ pago_funcionario: true })
-.eq("funcionario_id",funcionarioSelecionado.id)
-.eq("status","finalizado")
-.gte("data_finalizacao",`${dataInicial}T00:00:00`)
-.lte("data_finalizacao",`${dataFinal}T23:59:59`);
-
-await supabase
-.from("despesas_funcionarios")
-.delete()
-.eq("funcionario_id",funcionarioSelecionado.id);
-
-setServicos([]);
-setValorBruto(0);
-setDespesas(0);
-setVales(0);
-setLiquido(0);
-
-alert("Pagamento registrado");
-
-}catch(e){
-
-console.log(e);
-alert("Erro ao registrar pagamento");
-
-}
 
 }
 
@@ -342,38 +271,17 @@ Buscar
 Serviços finalizados: {servicos.length}
 </p>
 
-{/* <p className="text-sm mb-1">
-Valor bruto: {formatar(valorBruto)}
-</p>
-
-<p className="text-sm mb-1">
-Despesas: {formatar(despesas)}
-</p>
-
-<p className="text-sm mb-1">
-Vales: {formatar(vales)}
-</p> */}
-
 <hr className="my-2"/>
 
 <p className="text-lg font-bold">
 Valor bruto: {formatar(valorBruto)}
 </p>
 
-{jaPago ? (
+{jaPago && (
 
 <div className="mt-4 bg-green-100 border border-green-300 text-green-700 p-3 rounded text-center font-semibold">
 ✔ Pagamento já realizado neste período
 </div>
-
-) : (
-
-<button
-onClick={pagarFuncionario}
-className="mt-4 w-full bg-blue-600 text-white py-2 rounded font-semibold"
->
-Pagar Funcionário
-</button>
 
 )}
 
