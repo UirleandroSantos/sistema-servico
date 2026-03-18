@@ -41,8 +41,14 @@ setFuncionarios(data || []);
 }
 
 /* =========================
-BUSCAR DESPESAS
+🔥 BUSCAR DESPESAS (CORRIGIDO)
 ========================= */
+
+useEffect(()=>{
+if(funcionarioSelecionado){
+buscarDespesas();
+}
+},[funcionarioSelecionado]);
 
 async function buscarDespesas(){
 
@@ -151,14 +157,7 @@ Funcionários
 
 <div
 key={f.id}
-onClick={()=>{
-setFuncionarioSelecionado(f);
-useEffect(()=>{
-if(funcionarioSelecionado){
-buscarDespesas();
-}
-},[funcionarioSelecionado]);
-}}
+onClick={()=>setFuncionarioSelecionado(f)}
 className="p-3 border rounded bg-white shadow cursor-pointer hover:bg-gray-100"
 >
 {f.nome}
