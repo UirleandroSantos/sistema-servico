@@ -41,7 +41,7 @@ setFuncionarios(data || []);
 }
 
 /* =========================
-🔥 BUSCAR DESPESAS (CORRIGIDO)
+BUSCAR DESPESAS
 ========================= */
 
 useEffect(()=>{
@@ -78,10 +78,6 @@ return;
 }
 
 let valorFinal = Number(valor);
-
-if(tipo === "despesa"){
-valorFinal = valorFinal / 2;
-}
 
 await supabase
 .from("despesas_funcionarios")
@@ -129,6 +125,18 @@ style:"currency",
 currency:"BRL"
 });
 }
+
+/* =========================
+🔥 TOTAIS
+========================= */
+
+const totalVales = despesas
+.filter(d => d.tipo === "vale")
+.reduce((acc, d) => acc + Number(d.valor), 0);
+
+const totalDespesas = despesas
+.filter(d => d.tipo === "despesa")
+.reduce((acc, d) => acc + Number(d.valor), 0);
 
 /* =========================
 TELA DE FUNCIONÁRIOS
@@ -236,6 +244,20 @@ className="bg-green-600 text-white py-2 rounded"
 >
 Salvar
 </button>
+
+</div>
+
+{/* 🔥 TOTAIS */}
+
+<div className="mb-4">
+
+<p className="text-sm">
+Total de Vales: <strong>{formatar(totalVales)}</strong>
+</p>
+
+<p className="text-sm">
+Total de Despesas: <strong>{formatar(totalDespesas)}</strong>
+</p>
 
 </div>
 
